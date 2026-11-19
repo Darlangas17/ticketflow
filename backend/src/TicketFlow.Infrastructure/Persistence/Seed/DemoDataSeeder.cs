@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using TicketFlow.Application.Abstractions;
 using TicketFlow.Domain.Entities;
 using TicketFlow.Domain.Enums;
 
@@ -22,6 +23,7 @@ public static class DemoDataSeeder
 
     public static async Task<bool> SeedAsync(
         TicketFlowDbContext db,
+        IPasswordHasher passwordHasher,
         TimeProvider? timeProvider = null,
         CancellationToken cancellationToken = default)
     {
@@ -35,7 +37,7 @@ public static class DemoDataSeeder
 
         var branches = CreateBranches();
         var categories = CreateCategories();
-        var users = CreateUsers(now);
+        var users = CreateUsers(now, passwordHasher);
         var tickets = CreateTickets(random, now, branches, categories, users);
 
         db.Branches.AddRange(branches);
@@ -69,10 +71,10 @@ public static class DemoDataSeeder
         public IEnumerable<User> All => Technicians.Concat(Requesters).Prepend(Admin);
     }
 
-    private static DemoUsers CreateUsers(DateTime now)
+    private static DemoUsers CreateUsers(DateTime now, IPasswordHasher passwordHasher)
     {
         // Same password for every demo account, so hash once (BCrypt is slow on purpose).
-        var hash = BCrypt.Net.BCrypt.HashPassword(DemoPassword);
+        var hash = passwordHasher.Hash(DemoPassword);
         var createdAt = now.AddDays(-90);
 
         User NewUser(string name, string email, UserRole role) => new()

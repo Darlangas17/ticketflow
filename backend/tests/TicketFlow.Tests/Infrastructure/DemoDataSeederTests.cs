@@ -1,6 +1,7 @@
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using TicketFlow.Domain.Enums;
+using TicketFlow.Infrastructure.Auth;
 using TicketFlow.Infrastructure.Persistence.Seed;
 
 namespace TicketFlow.Tests.Infrastructure;
@@ -14,7 +15,7 @@ public class DemoDataSeederTests : IDisposable
     private async Task SeedAsync()
     {
         await using var db = _database.CreateContext();
-        await DemoDataSeeder.SeedAsync(db);
+        await DemoDataSeeder.SeedAsync(db, new BCryptPasswordHasher());
     }
 
     [Fact]
@@ -46,7 +47,7 @@ public class DemoDataSeederTests : IDisposable
         await SeedAsync();
 
         await using var db = _database.CreateContext();
-        var seededAgain = await DemoDataSeeder.SeedAsync(db);
+        var seededAgain = await DemoDataSeeder.SeedAsync(db, new BCryptPasswordHasher());
 
         seededAgain.Should().BeFalse();
         (await db.Tickets.CountAsync()).Should().Be(DemoDataSeeder.TicketCount);

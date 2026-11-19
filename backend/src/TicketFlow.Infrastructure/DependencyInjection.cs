@@ -1,19 +1,36 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
+using TicketFlow.Application.Abstractions;
+using TicketFlow.Infrastructure.Auth;
 using TicketFlow.Infrastructure.Persistence;
 using TicketFlow.Infrastructure.Persistence.Seed;
+using TicketFlow.Infrastructure.Repositories;
 
 namespace TicketFlow.Infrastructure;
 
 public static class DependencyInjection
 {
-    public static IServiceCollection AddInfrastructure(this IServiceCollection services, string? connectionString)
+    public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
-        // The connection string may be null at design time (dotnet ef migrations add);
+        // The connection string may be missing at design time (dotnet ef migrations add);
         // it is validated when the database is actually used.
+        var connectionString = configuration.GetConnectionString("Default");
         services.AddDbContext<TicketFlowDbContext>(options =>
             options.UseSqlServer(connectionString, sql => sql.EnableRetryOnFailure()));
+
+        // Fails at startup (not on the first login) if the JWT settings are missing or too weak.
+        services.AddOptions<JwtOptions>()
+            .Bind(configuration.GetSection(JwtOptions.SectionName))
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+
+        services.TryAddSingleton(TimeProvider.System);
+        services.AddSingleton<IPasswordHasher, BCryptPasswordHasher>();
+        services.AddSingleton<ITokenService, JwtTokenService>();
+        services.AddScoped<IUserRepository, UserRepository>();
 
         return services;
     }
@@ -23,6 +40,7 @@ public static class DependencyInjection
     {
         await using var scope = services.CreateAsyncScope();
         var db = scope.ServiceProvider.GetRequiredService<TicketFlowDbContext>();
+        var passwordHasher = scope.ServiceProvider.GetRequiredService<IPasswordHasher>();
         var logger = scope.ServiceProvider.GetRequiredService<ILoggerFactory>().CreateLogger(typeof(DependencyInjection));
 
         if (string.IsNullOrWhiteSpace(db.Database.GetConnectionString()))
@@ -35,7 +53,7 @@ public static class DependencyInjection
         logger.LogInformation("Applying database migrations...");
         await db.Database.MigrateAsync(cancellationToken);
 
-        var seeded = await DemoDataSeeder.SeedAsync(db, cancellationToken: cancellationToken);
+        var seeded = await DemoDataSeeder.SeedAsync(db, passwordHasher, cancellationToken: cancellationToken);
         logger.LogInformation(seeded ? "Demo data inserted." : "Database already has data; seed skipped.");
     }
 }
