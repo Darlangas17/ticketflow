@@ -12,6 +12,7 @@
   <ItemGroup>
     <PackageReference Include="coverlet.collector" Version="6.0.0" />
     <PackageReference Include="FluentAssertions" Version="7.2.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="8.0.34" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.34" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
     <PackageReference Include="xunit" Version="2.5.3" />
@@ -26,6 +27,7 @@
     <ProjectReference Include="..\..\src\TicketFlow.Domain\TicketFlow.Domain.csproj" />
     <ProjectReference Include="..\..\src\TicketFlow.Application\TicketFlow.Application.csproj" />
     <ProjectReference Include="..\..\src\TicketFlow.Infrastructure\TicketFlow.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\src\TicketFlow.Api\TicketFlow.Api.csproj" />
   </ItemGroup>
 
 </Project>
