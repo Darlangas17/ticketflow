@@ -47,19 +47,23 @@ docker run -d --name ticketflow-sql \
   mcr.microsoft.com/mssql/server:2022-latest
 ```
 
-### 2. Configure the connection string
+### 2. Configure the secrets
 
-The connection string is a secret and is **not** stored in the repo. For local development use
-[user secrets](https://learn.microsoft.com/aspnet/core/security/app-secrets) (stored outside the project folder):
+The connection string and the JWT signing key are secrets and are **not** stored in the repo. For local
+development use [user secrets](https://learn.microsoft.com/aspnet/core/security/app-secrets) (stored outside the project folder):
 
 ```bash
 cd backend
 dotnet user-secrets set "ConnectionStrings:Default" \
   "Server=localhost,1433;Database=TicketFlow;User Id=sa;Password=<YourStrong!Passw0rd>;TrustServerCertificate=True" \
   --project src/TicketFlow.Api
+
+# Any random string of at least 32 characters, e.g. generated with: openssl rand -base64 48
+dotnet user-secrets set "Jwt:SigningKey" "<random-string-of-32+-characters>" --project src/TicketFlow.Api
 ```
 
-Alternatively, set the environment variable `ConnectionStrings__Default`.
+Alternatively, use the environment variables `ConnectionStrings__Default` and `Jwt__SigningKey`.
+The API refuses to start if the signing key is missing or shorter than 32 characters.
 
 ### 3. Apply migrations and seed demo data
 
@@ -92,6 +96,24 @@ dotnet ef migrations remove --project src/TicketFlow.Infrastructure --startup-pr
 # Start over with an empty database (deletes all data)
 dotnet ef database drop --project src/TicketFlow.Infrastructure --startup-project src/TicketFlow.Api
 ```
+
+### Authentication and Swagger
+
+With the API running in Development, open **http://localhost:5000/swagger**.
+
+1. Call `POST /api/auth/login` with a demo user (see below) and copy the `accessToken`.
+2. Click **Authorize** and paste the token (without the `Bearer ` prefix).
+3. Endpoints with a padlock now send the token, e.g. `GET /api/auth/me`.
+
+| Method | Route | Auth | Description |
+|---|---|---|---|
+| POST | `/api/auth/register` | Public | Creates an account (always with the Requester role) and returns a token |
+| POST | `/api/auth/login` | Public | Returns a JWT (valid 60 min) and the user's data |
+| GET | `/api/auth/me` | Bearer token | Current user |
+
+Every endpoint requires a valid token unless it is marked as public. Errors use
+[ProblemDetails](https://www.rfc-editor.org/rfc/rfc7807): 400 validation, 401 invalid credentials or token,
+403 disabled account, 409 e-mail already registered.
 
 ### Demo data
 
@@ -129,7 +151,7 @@ Database tests use in-memory SQLite, so they don't need SQL Server.
 
 Usa el mismo comando `docker run` de la sección en inglés, cambiando `<YourStrong!Passw0rd>` por tu contraseña.
 
-### 2. Configurar la cadena de conexión
+### 2. Configurar los secretos
 
 La cadena de conexión es un secreto y **no** se guarda en el repo. En desarrollo usa *user secrets*:
 
@@ -142,6 +164,14 @@ dotnet user-secrets set "ConnectionStrings:Default" \
 
 También puedes usar la variable de entorno `ConnectionStrings__Default`.
 
+También debes configurar la clave para firmar los JWT (cualquier texto aleatorio de 32 caracteres o más):
+
+```bash
+dotnet user-secrets set "Jwt:SigningKey" "<texto-aleatorio-de-32+-caracteres>" --project src/TicketFlow.Api
+```
+
+O usa las variables de entorno `ConnectionStrings__Default` y `Jwt__SigningKey`. Sin la clave, la API no arranca.
+
 ### 3. Aplicar migraciones y datos demo
 
 - **Opción A:** `dotnet run --project src/TicketFlow.Api`. En `Development` aplica las migraciones e inserta los datos demo automáticamente (solo si la base está vacía).
@@ -151,6 +181,13 @@ También puedes usar la variable de entorno `ConnectionStrings__Default`.
 
 Para crear una migración nueva:
 `dotnet ef migrations add <Nombre> --project src/TicketFlow.Infrastructure --startup-project src/TicketFlow.Api --output-dir Persistence/Migrations`
+
+### Autenticación y Swagger
+
+Con la API corriendo en Development abre **http://localhost:5000/swagger**, haz login en
+`POST /api/auth/login` con un usuario demo, copia el `accessToken`, pulsa **Authorize** y pégalo.
+Endpoints: `POST /api/auth/register` (público, siempre crea Requester), `POST /api/auth/login` (público)
+y `GET /api/auth/me` (requiere token). Todos los demás endpoints requieren token salvo que sean públicos.
 
 ### Datos demo
 
