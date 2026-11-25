@@ -15,3 +15,6 @@ public sealed class NotFoundException(string message) : Exception(message);
 
 /// <summary>The request conflicts with the current state, e.g. a duplicate e-mail (HTTP 409).</summary>
 public sealed class ConflictException(string message) : Exception(message);
+
+/// <summary>The request is well-formed but breaks a business rule, e.g. an invalid status transition (HTTP 400).</summary>
+public sealed class BusinessRuleException(string message) : Exception(message);

@@ -1,6 +1,7 @@
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 using TicketFlow.Application.Auth;
+using TicketFlow.Application.Tickets;
 
 namespace TicketFlow.Application;
 
@@ -12,6 +13,7 @@ public static class DependencyInjection
         ValidatorOptions.Global.LanguageManager.Enabled = false;
         services.AddValidatorsFromAssembly(typeof(DependencyInjection).Assembly);
         services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<ITicketService, TicketService>();
         return services;
     }
 }
