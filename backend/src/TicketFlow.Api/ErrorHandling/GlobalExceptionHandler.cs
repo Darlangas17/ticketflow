@@ -20,6 +20,7 @@ public sealed class GlobalExceptionHandler(
         var problem = exception switch
         {
             ValidationException validation => CreateValidationProblem(validation),
+            BusinessRuleException => Problem(StatusCodes.Status400BadRequest, "Business rule violation", exception.Message),
             UnauthorizedException => Problem(StatusCodes.Status401Unauthorized, "Unauthorized", exception.Message),
             ForbiddenException => Problem(StatusCodes.Status403Forbidden, "Forbidden", exception.Message),
             NotFoundException => Problem(StatusCodes.Status404NotFound, "Not found", exception.Message),
