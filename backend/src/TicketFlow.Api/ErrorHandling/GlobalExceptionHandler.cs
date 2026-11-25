@@ -10,6 +10,9 @@ namespace TicketFlow.Api.ErrorHandling;
 /// Turns exceptions into RFC 7807 ProblemDetails responses. Known application
 /// exceptions map to 4xx; anything else is logged and returned as a generic 500
 /// without internal details.
+/// In .NET 8 the ExceptionHandlerMiddleware also logs every exception (even expected 4xx ones)
+/// as an error with its stack trace; that category is turned off in appsettings.json, so
+/// this class is the single place that logs real failures.
 /// </summary>
 public sealed class GlobalExceptionHandler(
     IProblemDetailsService problemDetailsService,
