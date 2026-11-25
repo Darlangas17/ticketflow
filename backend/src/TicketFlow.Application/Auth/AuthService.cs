@@ -31,7 +31,7 @@ public sealed class AuthService(
     {
         await registerValidator.ValidateAndThrowAsync(request, cancellationToken);
 
-        var email = NormalizeEmail(request.Email);
+        var email = AccountRules.NormalizeEmail(request.Email);
         if (await users.EmailExistsAsync(email, cancellationToken))
         {
             throw new ConflictException("An account with this email already exists.");
@@ -55,7 +55,7 @@ public sealed class AuthService(
     {
         await loginValidator.ValidateAndThrowAsync(request, cancellationToken);
 
-        var user = await users.GetByEmailAsync(NormalizeEmail(request.Email), cancellationToken);
+        var user = await users.GetByEmailAsync(AccountRules.NormalizeEmail(request.Email), cancellationToken);
 
         // Always verify (even for unknown e-mails) so both failures take the same time.
         var passwordIsValid = passwordHasher.Verify(request.Password, user?.PasswordHash);
@@ -91,5 +91,4 @@ public sealed class AuthService(
         return new AuthResponse(token.Token, token.ExpiresAt, UserDto.FromEntity(user));
     }
 
-    private static string NormalizeEmail(string email) => email.Trim().ToLowerInvariant();
 }

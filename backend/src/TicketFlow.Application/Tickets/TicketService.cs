@@ -233,17 +233,8 @@ public sealed class TicketService(
         await tickets.SaveChangesAsync(cancellationToken);
     }
 
-    private async Task<Actor> GetActorAsync(int userId, CancellationToken cancellationToken)
-    {
-        // Loaded from the database so a deactivation or role change applies to existing tokens too.
-        var user = await users.GetByIdAsync(userId, cancellationToken);
-        if (user is null || !user.IsActive)
-        {
-            throw new UnauthorizedException("The user no longer exists or is disabled.");
-        }
-
-        return new Actor(user.Id, user.FullName, user.Role);
-    }
+    private Task<Actor> GetActorAsync(int userId, CancellationToken cancellationToken) =>
+        users.GetActorAsync(userId, cancellationToken);
 
     private async Task<TicketDetailsDto> GetDetailsAsync(Actor actor, int ticketId, CancellationToken cancellationToken)
     {
