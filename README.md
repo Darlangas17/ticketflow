@@ -12,8 +12,8 @@ IT support ticket system for a company with multiple branches.
 - **Backend:** .NET 8, ASP.NET Core Web API, Entity Framework Core 8
 - **Database:** SQL Server 2022 (Docker)
 - **Auth:** JWT + BCrypt
-- **Frontend:** Angular 17+ (standalone components, signals)
-- **Tests:** xUnit + FluentAssertions, Angular test runner
+- **Frontend:** Angular 21 (standalone components, signals, lazy-loaded routes) + Angular Material
+- **Tests:** xUnit + FluentAssertions (backend), Vitest (frontend)
 - **DevOps:** Docker Compose, GitHub Actions
 
 ## Structure / Estructura
@@ -37,6 +37,7 @@ frontend/
 
 - [.NET SDK](https://dotnet.microsoft.com/download) 8 or newer (projects target `net8.0`)
 - [Docker](https://www.docker.com/) (for SQL Server)
+- [Node.js](https://nodejs.org/) 20.19+, 22.12+ or 24+ and **npm 11** (for the frontend; see [Frontend](#frontend))
 
 ### 1. Start SQL Server
 
@@ -180,6 +181,48 @@ is written to the ticket history with who made it and when.
   requesters get the numbers of the tickets they can see. Every number is computed by the database
   (`GROUP BY`, `COUNT`, `AVG(DATEDIFF(...))`), so no tickets are loaded into memory.
 
+### Frontend
+
+The Angular app lives in `frontend/ticketflow-web`. Start the API first (see above), then:
+
+```bash
+cd frontend/ticketflow-web
+npm ci
+npm start          # http://localhost:4200
+```
+
+The dev server proxies `/api` to the API on `http://localhost:5000` (`proxy.conf.json`), so the browser
+talks to a single origin and the API needs no CORS setup. Sign in with a demo user; the login page has
+buttons that fill in each one.
+
+> **npm 11 is required.** npm 10.9 crashes while resolving this project's dependencies
+> (`Cannot read properties of null (reading 'edgesOut')`) and does not accept the lockfile in `npm ci`.
+> Upgrade with `npm install -g npm@11`, or run any command through npx: `npx npm@11 ci`.
+
+| Command | Description |
+|---|---|
+| `npm start` | Dev server with live reload |
+| `npm test` | Unit tests (Vitest, no browser needed) |
+| `npm run lint` | ESLint with angular-eslint (`any` is not allowed) |
+| `npm run build` | Production build in `dist/` |
+
+What is in place:
+
+- **Login and registration** with reactive forms. Password rules match the API's, and the API's validation
+  errors are shown under the matching fields.
+- **`AuthService` with signals** (`currentUser`, `isAuthenticated`, `role`...). The session is saved in
+  `localStorage`, checked against `/api/auth/me` on startup (so a disabled account or role change applies
+  at once) and closed automatically when the token expires.
+- **HTTP interceptor** that adds the JWT only to `/api` requests and signs the user out on a 401,
+  remembering the page to return to.
+- **Guards:** `authGuard`, `guestGuard` and `roleGuard('Admin')`. They use `canMatch`, so the code of a page
+  is not even downloaded by users who cannot open it. `returnUrl` only accepts paths inside the app
+  (no open redirects).
+- **Responsive layout** with navigation by role: Admins see the Administration section; requesters see
+  "My tickets". On phones the menu becomes a drawer.
+- Every page is **lazy-loaded**. Ticket, dashboard and administration screens are placeholders until the
+  next phases.
+
 ### Postman collection
 
 [`docs/postman/TicketFlow.postman_collection.json`](docs/postman/TicketFlow.postman_collection.json) has a request
@@ -223,6 +266,7 @@ Database tests use in-memory SQLite, so they don't need SQL Server.
 
 - [.NET SDK](https://dotnet.microsoft.com/download) 8 o superior (los proyectos apuntan a `net8.0`)
 - [Docker](https://www.docker.com/) (para SQL Server)
+- [Node.js](https://nodejs.org/) 20.19+, 22.12+ o 24+ y **npm 11** (para el frontend)
 
 ### 1. Levantar SQL Server
 
@@ -295,6 +339,34 @@ Las rutas están en la tabla de la sección en inglés. Reglas principales:
 - **Dashboard:** `GET /api/dashboard/summary` da totales por estado, prioridad, sucursal y categoría, y el tiempo promedio
   de resolución. Respeta la visibilidad por rol: el admin ve todo; técnicos y solicitantes ven solo lo de sus tickets.
   Todo se calcula en la base de datos (`GROUP BY`, `COUNT`, `AVG(DATEDIFF(...))`), sin traer los tickets a memoria.
+
+### Frontend
+
+La app Angular está en `frontend/ticketflow-web`. Con la API corriendo:
+
+```bash
+cd frontend/ticketflow-web
+npm ci
+npm start          # http://localhost:4200
+```
+
+El servidor de desarrollo redirige `/api` a la API en `http://localhost:5000` (`proxy.conf.json`), así que el
+navegador usa un solo origen y la API no necesita CORS. La pantalla de login tiene botones para llenar
+cada usuario demo.
+
+> **Se requiere npm 11.** npm 10.9 falla al resolver las dependencias (`Cannot read properties of null
+> (reading 'edgesOut')`) y no acepta el lockfile en `npm ci`. Actualiza con `npm install -g npm@11` o usa
+> `npx npm@11 ci`.
+
+Comandos: `npm start` (desarrollo), `npm test` (pruebas con Vitest), `npm run lint` (ESLint, sin `any`),
+`npm run build` (build de producción).
+
+Incluye: login y registro con formularios reactivos; `AuthService` con signals y sesión guardada en
+`localStorage` (se valida con `/api/auth/me` al iniciar y se cierra sola al expirar el token); interceptor que
+agrega el JWT solo a `/api` y cierra la sesión ante un 401; guards `authGuard`, `guestGuard` y
+`roleGuard('Admin')` con `canMatch`; y un layout responsive con navegación según el rol. Todas las páginas
+se cargan con lazy loading. Tickets, dashboard y administración son páginas provisionales hasta las
+siguientes fases.
 
 ### Colección de Postman
 
