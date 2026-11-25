@@ -155,6 +155,18 @@ Moving to `Resolved` sets `resolvedAt`. Staff can make any valid transition; a r
 their own ticket once it is `Resolved` (confirming the fix). Every change of status, priority or assignee
 is written to the ticket history with who made it and when.
 
+### Postman collection
+
+[`docs/postman/TicketFlow.postman_collection.json`](docs/postman/TicketFlow.postman_collection.json) has a request
+for every endpoint plus automated checks (roles, visibility, the full ticket lifecycle and error cases).
+Import it into Postman and run it with the **Collection Runner**, in order: the *Auth* folder logs in one demo
+user per role and stores their tokens for the rest. The run deletes the ticket it creates, so the demo data
+stays unchanged. From the command line, with the API running:
+
+```bash
+npx newman run docs/postman/TicketFlow.postman_collection.json
+```
+
 ### Demo data
 
 The seed creates 3 branches, 5 categories, 30 tickets (with comments and history) and these users.
@@ -243,6 +255,14 @@ Los endpoints de `/api/tickets` están en la tabla de la sección en inglés. Re
 - **Permisos:** técnicos y admins cambian estados y asignan; el solicitante solo puede cerrar su ticket
   cuando ya está `Resolved`. Solo el admin elimina tickets. Los tickets `Closed` no se editan ni se comentan.
 - **Historial:** todo cambio de estado, prioridad o asignado queda registrado con quién y cuándo.
+
+### Colección de Postman
+
+`docs/postman/TicketFlow.postman_collection.json` trae una petición por endpoint con pruebas automáticas
+(roles, visibilidad, ciclo completo del ticket y casos de error). Impórtala en Postman y ejecútala con el
+**Collection Runner** en orden: la carpeta *Auth* inicia sesión con un usuario por rol y guarda los tokens.
+Al final borra el ticket que crea. Desde la terminal, con la API corriendo:
+`npx newman run docs/postman/TicketFlow.postman_collection.json`
 
 ### Datos demo
 
