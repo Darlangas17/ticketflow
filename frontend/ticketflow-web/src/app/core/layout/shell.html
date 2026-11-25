@@ -1,0 +1,89 @@
+<mat-sidenav-container class="container">
+  <mat-sidenav
+    #drawer
+    class="sidenav"
+    [mode]="isHandset() ? 'over' : 'side'"
+    [opened]="!isHandset()"
+    [attr.role]="isHandset() ? 'dialog' : 'navigation'"
+  >
+    <div class="brand">
+      <mat-icon class="brand-icon" aria-hidden="true">support_agent</mat-icon>
+      <span>TicketFlow</span>
+    </div>
+
+    <nav aria-label="Main navigation">
+      @for (section of sections(); track $index) {
+        @if (section.title) {
+          <mat-divider />
+          <h2 class="section-title">{{ section.title }}</h2>
+        }
+        <mat-nav-list>
+          @for (item of section.items; track item.path) {
+            <a
+              mat-list-item
+              [routerLink]="item.path"
+              routerLinkActive="active-link"
+              #link="routerLinkActive"
+              [activated]="link.isActive"
+              [attr.aria-current]="link.isActive ? 'page' : null"
+              (click)="isHandset() && drawer.close()"
+            >
+              <mat-icon matListItemIcon aria-hidden="true">{{ item.icon }}</mat-icon>
+              <span matListItemTitle>{{ item.label }}</span>
+            </a>
+          }
+        </mat-nav-list>
+      }
+    </nav>
+  </mat-sidenav>
+
+  <mat-sidenav-content class="content">
+    <mat-toolbar class="toolbar">
+      @if (isHandset()) {
+        <button
+          mat-icon-button
+          type="button"
+          aria-label="Open navigation menu"
+          (click)="drawer.toggle()"
+        >
+          <mat-icon>menu</mat-icon>
+        </button>
+        <span class="toolbar-title">TicketFlow</span>
+      }
+      <span class="spacer"></span>
+
+      @if (user(); as user) {
+        <button
+          mat-button
+          type="button"
+          class="user-button"
+          [matMenuTriggerFor]="userMenu"
+          [attr.aria-label]="'Account menu for ' + user.fullName"
+        >
+          <span class="avatar" aria-hidden="true">{{ initials() }}</span>
+          @if (!isHandset()) {
+            <span class="user-name">{{ user.fullName }}</span>
+          }
+          <mat-icon iconPositionEnd>arrow_drop_down</mat-icon>
+        </button>
+
+        <mat-menu #userMenu="matMenu" xPosition="before">
+          <div class="menu-header" role="presentation">
+            <div class="menu-name">{{ user.fullName }}</div>
+            <div class="menu-email">{{ user.email }}</div>
+            <div class="role-badge" [attr.data-role]="user.role">{{ user.role }}</div>
+          </div>
+          <mat-divider />
+          <button mat-menu-item type="button" (click)="logout()">
+            <mat-icon>logout</mat-icon>
+            <span>Sign out</span>
+          </button>
+        </mat-menu>
+      }
+    </mat-toolbar>
+
+    <main class="main">
+      <router-outlet />
+    </main>
+  </mat-sidenav-content>
+</mat-sidenav-container>

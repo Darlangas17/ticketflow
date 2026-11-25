@@ -1,1 +1,61 @@
-/* You can add global styles to this file, and also import other style files */
+@use '@angular/material' as mat;
+
+// Material 3 theme. Every component uses the system tokens (--mat-sys-*), so colors stay consistent.
+html {
+  color-scheme: light;
+  @include mat.theme(
+    (
+      color: (
+        primary: mat.$azure-palette,
+        tertiary: mat.$violet-palette,
+      ),
+      typography: Roboto,
+      density: 0,
+    )
+  );
+
+  // The navigation drawer sits flush against the page edge, so no rounded corners.
+  @include mat.sidenav-overrides(
+    (
+      container-shape: 0,
+    )
+  );
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: Roboto, 'Helvetica Neue', sans-serif;
+  background: var(--mat-sys-surface-container-lowest);
+  color: var(--mat-sys-on-surface);
+}
+
+// ----- Small shared utilities -----
+
+.page {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+  box-sizing: border-box;
+
+  @media (max-width: 599px) {
+    padding: 16px;
+  }
+}
+
+.page-title {
+  font: var(--mat-sys-headline-small);
+  margin: 0 0 16px;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.error-text {
+  color: var(--mat-sys-error);
+}
