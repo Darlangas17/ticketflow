@@ -115,6 +115,46 @@ Every endpoint requires a valid token unless it is marked as public. Errors use
 [ProblemDetails](https://www.rfc-editor.org/rfc/rfc7807): 400 validation, 401 invalid credentials or token,
 403 disabled account, 409 e-mail already registered.
 
+### Tickets
+
+| Method | Route | Who | Description |
+|---|---|---|---|
+| GET | `/api/tickets` | Any role | Paginated list with filters, search and sort (see below) |
+| GET | `/api/tickets/{id}` | Any role | Details with comments, history and the allowed next statuses |
+| POST | `/api/tickets` | Any role | Creates an `Open` ticket with the caller as requester |
+| PUT | `/api/tickets/{id}` | Any role | Edits title, description, priority and category (not when `Closed`) |
+| PATCH | `/api/tickets/{id}/status` | Staff; requester only to close | Changes the status and records it in the history |
+| PATCH | `/api/tickets/{id}/assign` | Technician, Admin | Assigns an active technician/admin (`null` unassigns) |
+| POST | `/api/tickets/{id}/comments` | Any role | Adds a comment (not when `Closed`) |
+| DELETE | `/api/tickets/{id}` | Admin | Deletes the ticket with its comments and history |
+
+**List parameters:** `page` (default 1), `pageSize` (default 20, max 100), `status`, `priority`, `branchId`,
+`categoryId`, `assigneeId`, `search` (title, description or ticket number such as `#12`) and `sort`
+(`createdAt`, `updatedAt`, `priority`, `status`, `title`; prefix with `-` for descending, default `-createdAt`).
+Example: `GET /api/tickets?status=InProgress&priority=High&sort=-priority&page=1&pageSize=20`.
+
+**Visibility by role**
+
+- **Requester:** only their own tickets.
+- **Technician:** tickets assigned to them plus unassigned tickets.
+- **Admin:** every ticket.
+
+A ticket outside the caller's visibility returns **404** (not 403), so the API does not reveal which ticket numbers exist.
+
+**Status workflow**
+
+```
+Open → InProgress ⇄ OnHold
+         ↓
+      Resolved → Closed
+```
+
+Any other transition returns **400** with the allowed options, e.g.
+`Invalid status transition from Open to Closed. Allowed: InProgress.`
+Moving to `Resolved` sets `resolvedAt`. Staff can make any valid transition; a requester can only close
+their own ticket once it is `Resolved` (confirming the fix). Every change of status, priority or assignee
+is written to the ticket history with who made it and when.
+
 ### Demo data
 
 The seed creates 3 branches, 5 categories, 30 tickets (with comments and history) and these users.
@@ -188,6 +228,21 @@ Con la API corriendo en Development abre **http://localhost:5000/swagger**, haz 
 `POST /api/auth/login` con un usuario demo, copia el `accessToken`, pulsa **Authorize** y pégalo.
 Endpoints: `POST /api/auth/register` (público, siempre crea Requester), `POST /api/auth/login` (público)
 y `GET /api/auth/me` (requiere token). Todos los demás endpoints requieren token salvo que sean públicos.
+
+### Tickets
+
+Los endpoints de `/api/tickets` están en la tabla de la sección en inglés. Resumen de las reglas:
+
+- **Listado:** `page` (1 por defecto), `pageSize` (20 por defecto, máximo 100), filtros `status`, `priority`,
+  `branchId`, `categoryId`, `assigneeId`, búsqueda `search` (título, descripción o número como `#12`)
+  y orden `sort` (`createdAt`, `updatedAt`, `priority`, `status`, `title`; con `-` delante es descendente).
+- **Visibilidad:** el solicitante ve solo sus tickets; el técnico ve los asignados a él y los sin asignar;
+  el admin ve todos. Un ticket que no puedes ver responde **404**.
+- **Estados:** `Open → InProgress ⇄ OnHold`, `InProgress → Resolved → Closed`. Cualquier otra transición
+  responde **400** con las opciones válidas. Al pasar a `Resolved` se llena `resolvedAt`.
+- **Permisos:** técnicos y admins cambian estados y asignan; el solicitante solo puede cerrar su ticket
+  cuando ya está `Resolved`. Solo el admin elimina tickets. Los tickets `Closed` no se editan ni se comentan.
+- **Historial:** todo cambio de estado, prioridad o asignado queda registrado con quién y cuándo.
 
 ### Datos demo
 
