@@ -3,7 +3,10 @@ using FluentValidation;
 using Microsoft.Extensions.Options;
 using TicketFlow.Application.Abstractions;
 using TicketFlow.Application.Auth;
+using TicketFlow.Application.Common;
 using TicketFlow.Application.Common.Exceptions;
+using TicketFlow.Application.Tickets;
+using TicketFlow.Application.Users;
 using TicketFlow.Domain.Entities;
 using TicketFlow.Domain.Enums;
 using TicketFlow.Infrastructure.Auth;
@@ -188,5 +191,20 @@ public class AuthServiceTests
             Add(user);
             return Task.CompletedTask;
         }
+
+        // Not used by AuthService.
+        public Task<User?> GetForUpdateAsync(int id, CancellationToken cancellationToken = default) =>
+            GetByIdAsync(id, cancellationToken);
+
+        public Task<bool> EmailTakenByOtherAsync(string email, int userId, CancellationToken cancellationToken = default) =>
+            Task.FromResult(this.Any(u => u.Email == email && u.Id != userId));
+
+        public Task<PagedResult<UserAccountDto>> ListAsync(UserListQuery query, CancellationToken cancellationToken = default) =>
+            throw new NotSupportedException();
+
+        public Task<IReadOnlyList<UserSummaryDto>> ListAssigneesAsync(CancellationToken cancellationToken = default) =>
+            throw new NotSupportedException();
+
+        public Task SaveChangesAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
     }
 }
