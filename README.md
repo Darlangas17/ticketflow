@@ -155,6 +155,31 @@ Moving to `Resolved` sets `resolvedAt`. Staff can make any valid transition; a r
 their own ticket once it is `Resolved` (confirming the fix). Every change of status, priority or assignee
 is written to the ticket history with who made it and when.
 
+### Catalogs, users and dashboard
+
+| Method | Route | Who | Description |
+|---|---|---|---|
+| GET | `/api/branches` | Any role | Active branches by name (`?includeInactive=true` also lists inactive ones, admins only) |
+| GET | `/api/branches/{id}` | Any role | One branch |
+| POST / PUT / DELETE | `/api/branches[/{id}]` | Admin | Create, edit (including `isActive`) and delete |
+| GET | `/api/categories[/{id}]` | Any role | Categories by name |
+| POST / PUT / DELETE | `/api/categories[/{id}]` | Admin | Create, edit and delete |
+| GET | `/api/users` | Admin | Paginated users; filters `role`, `isActive`, `search` (name or e-mail) |
+| GET | `/api/users/{id}` | Admin | One user |
+| POST | `/api/users` | Admin | Creates a user with any role |
+| PUT | `/api/users/{id}` | Admin | Edits name, e-mail, role and status; `password` is optional (resets it) |
+| GET | `/api/users/assignees` | Technician, Admin | Active technicians and admins, for assigning tickets |
+| GET | `/api/dashboard/summary` | Any role | Totals by status, priority, branch and category; average resolution time |
+
+- Branch and category names are unique, ignoring case (409 on duplicates).
+- A branch or category with tickets cannot be deleted (409). Branches are **deactivated** instead: an inactive
+  branch keeps its history but cannot receive new tickets.
+- Users are never deleted, only deactivated. A deactivated user loses access immediately, even with a valid token.
+  An admin cannot deactivate themselves or remove their own Admin role, so there is always an active admin.
+- The dashboard uses the same visibility as the ticket list: admins get company-wide numbers, technicians and
+  requesters get the numbers of the tickets they can see. Every number is computed by the database
+  (`GROUP BY`, `COUNT`, `AVG(DATEDIFF(...))`), so no tickets are loaded into memory.
+
 ### Postman collection
 
 [`docs/postman/TicketFlow.postman_collection.json`](docs/postman/TicketFlow.postman_collection.json) has a request
@@ -255,6 +280,21 @@ Los endpoints de `/api/tickets` están en la tabla de la sección en inglés. Re
 - **Permisos:** técnicos y admins cambian estados y asignan; el solicitante solo puede cerrar su ticket
   cuando ya está `Resolved`. Solo el admin elimina tickets. Los tickets `Closed` no se editan ni se comentan.
 - **Historial:** todo cambio de estado, prioridad o asignado queda registrado con quién y cuándo.
+
+### Catálogos, usuarios y dashboard
+
+Las rutas están en la tabla de la sección en inglés. Reglas principales:
+
+- **Sucursales y categorías:** cualquier usuario las consulta; solo el admin las crea, edita y elimina.
+  Los nombres son únicos sin importar mayúsculas (409 si se repiten).
+- Una sucursal o categoría con tickets no se puede eliminar (409). Las sucursales se **desactivan**: conservan su
+  historial pero ya no reciben tickets nuevos.
+- **Usuarios** (solo admin): listado paginado con filtros `role`, `isActive` y `search`. No se eliminan, se desactivan,
+  y un usuario desactivado pierde el acceso al instante aunque tenga un token válido. El admin no puede desactivarse
+  ni quitarse el rol Admin a sí mismo. `GET /api/users/assignees` lista a quién se puede asignar un ticket (técnicos y admins).
+- **Dashboard:** `GET /api/dashboard/summary` da totales por estado, prioridad, sucursal y categoría, y el tiempo promedio
+  de resolución. Respeta la visibilidad por rol: el admin ve todo; técnicos y solicitantes ven solo lo de sus tickets.
+  Todo se calcula en la base de datos (`GROUP BY`, `COUNT`, `AVG(DATEDIFF(...))`), sin traer los tickets a memoria.
 
 ### Colección de Postman
 
