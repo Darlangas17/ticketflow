@@ -5,8 +5,6 @@ import { authGuard, guestGuard, roleGuard } from './core/auth/auth.guards';
 // Every page is lazy-loaded (its own JavaScript chunk). Guards use canMatch, so a chunk is
 // only downloaded by users allowed to open it.
 
-const placeholder = () =>
-  import('./shared/components/placeholder-page').then((m) => m.PlaceholderPage);
 const messagePage = () => import('./shared/components/message-page').then((m) => m.MessagePage);
 
 export const routes: Routes = [
@@ -32,12 +30,7 @@ export const routes: Routes = [
       {
         path: 'dashboard',
         title: 'Dashboard · TicketFlow',
-        loadComponent: placeholder,
-        data: {
-          title: 'Dashboard',
-          icon: 'dashboard',
-          description: 'Coming soon: ticket totals by status, priority and branch, with charts.',
-        },
+        loadComponent: () => import('./features/dashboard/dashboard').then((m) => m.Dashboard),
       },
       {
         path: 'tickets',
@@ -52,32 +45,20 @@ export const routes: Routes = [
           {
             path: 'users',
             title: 'Users · TicketFlow',
-            loadComponent: placeholder,
-            data: {
-              title: 'Users',
-              icon: 'group',
-              description: 'Coming soon: user administration.',
-            },
+            loadComponent: () =>
+              import('./features/admin/users/users-page').then((m) => m.UsersPage),
           },
           {
             path: 'branches',
             title: 'Branches · TicketFlow',
-            loadComponent: placeholder,
-            data: {
-              title: 'Branches',
-              icon: 'store',
-              description: 'Coming soon: branch administration.',
-            },
+            loadComponent: () =>
+              import('./features/admin/branches/branches-page').then((m) => m.BranchesPage),
           },
           {
             path: 'categories',
             title: 'Categories · TicketFlow',
-            loadComponent: placeholder,
-            data: {
-              title: 'Categories',
-              icon: 'category',
-              description: 'Coming soon: category administration.',
-            },
+            loadComponent: () =>
+              import('./features/admin/categories/categories-page').then((m) => m.CategoriesPage),
           },
         ],
       },

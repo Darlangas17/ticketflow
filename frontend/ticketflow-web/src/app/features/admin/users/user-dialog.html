@@ -1,0 +1,75 @@
+<h2 mat-dialog-title>{{ isEdit ? 'Edit user' : 'New user' }}</h2>
+
+<form [formGroup]="form" (ngSubmit)="save()" novalidate>
+  <mat-dialog-content>
+    @if (errorMessage(); as message) {
+      <p class="notice-error" role="alert">{{ message }}</p>
+    }
+
+    <mat-form-field class="full-width">
+      <mat-label>Full name</mat-label>
+      <input matInput formControlName="fullName" autocomplete="off" />
+      @if (form.controls.fullName.hasError('required')) {
+        <mat-error>Full name is required.</mat-error>
+      } @else if (form.controls.fullName.hasError('server')) {
+        <mat-error>{{ form.controls.fullName.getError('server') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field class="full-width">
+      <mat-label>E-mail</mat-label>
+      <input matInput formControlName="email" type="email" autocomplete="off" />
+      @if (form.controls.email.hasError('required')) {
+        <mat-error>E-mail is required.</mat-error>
+      } @else if (form.controls.email.hasError('email')) {
+        <mat-error>Enter a valid e-mail address.</mat-error>
+      } @else if (form.controls.email.hasError('server')) {
+        <mat-error>{{ form.controls.email.getError('server') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field class="full-width">
+      <mat-label>Role</mat-label>
+      <mat-select formControlName="role">
+        @for (role of roles; track role) {
+          <mat-option [value]="role">{{ role }}</mat-option>
+        }
+      </mat-select>
+      <mat-hint>{{ roleDescriptions[form.controls.role.value] }}</mat-hint>
+    </mat-form-field>
+
+    <mat-form-field class="full-width">
+      <mat-label>{{ isEdit ? 'New password (optional)' : 'Password' }}</mat-label>
+      <input matInput formControlName="password" type="password" autocomplete="new-password" />
+      <mat-hint>
+        {{ isEdit ? 'Leave empty to keep the current password. ' : '' }}8+ characters, with a letter
+        and a digit.
+      </mat-hint>
+      @if (form.controls.password.hasError('required')) {
+        <mat-error>Password is required.</mat-error>
+      } @else if (form.controls.password.hasError('passwordStrength')) {
+        <mat-error>Use at least 8 characters, with a letter and a digit.</mat-error>
+      } @else if (form.controls.password.hasError('server')) {
+        <mat-error>{{ form.controls.password.getError('server') }}</mat-error>
+      }
+    </mat-form-field>
+
+    @if (isEdit) {
+      <mat-slide-toggle formControlName="isActive">Account active</mat-slide-toggle>
+      <p class="hint">
+        @if (data.isSelf) {
+          You cannot change your own role or deactivate your own account.
+        } @else {
+          Inactive users cannot sign in, and their open sessions stop working immediately.
+        }
+      </p>
+    }
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button type="button" [mat-dialog-close]="undefined">Cancel</button>
+    <button mat-flat-button type="submit" [disabled]="saving()">
+      {{ saving() ? 'Saving…' : isEdit ? 'Save' : 'Create user' }}
+    </button>
+  </mat-dialog-actions>
+</form>
