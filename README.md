@@ -1,20 +1,51 @@
 # TicketFlow
 
-IT support ticket system for a company with multiple branches.
-*Sistema de tickets de soporte TI para una empresa con varias sucursales.*
+[![CI](https://github.com/Darlangas17/ticketflow/actions/workflows/ci.yml/badge.svg)](https://github.com/Darlangas17/ticketflow/actions/workflows/ci.yml)
 
-> 🚧 Work in progress / En construcción.
+IT support ticket system for a company with multiple branches: employees report problems, technicians
+work on them through a defined workflow, and admins manage users, branches and categories.
+*Sistema de tickets de soporte TI para una empresa con varias sucursales.*
 
 [English](#english) · [Español](#español)
 
+| Dashboard | Ticket list |
+|---|---|
+| ![Dashboard with key figures and charts](docs/screenshots/dashboard.jpg) | ![Ticket list with filters](docs/screenshots/ticket-list.jpg) |
+| **Ticket detail** | **User administration** |
+| ![Ticket detail with actions, comments and history](docs/screenshots/ticket-detail.jpg) | ![User administration](docs/screenshots/admin-users.jpg) |
+
+<p align="center">
+  <img src="docs/screenshots/mobile-tickets.jpg" alt="Ticket list on a phone" width="260">
+  <img src="docs/screenshots/login.jpg" alt="Sign-in page with demo accounts" width="460">
+</p>
+
 ## Stack
 
-- **Backend:** .NET 8, ASP.NET Core Web API, Entity Framework Core 8
+- **Backend:** .NET 8, ASP.NET Core Web API, Entity Framework Core 8, FluentValidation
 - **Database:** SQL Server 2022 (Docker)
-- **Auth:** JWT + BCrypt
+- **Auth:** JWT (HMAC-SHA256) + BCrypt
 - **Frontend:** Angular 21 (standalone components, signals, lazy-loaded routes) + Angular Material
-- **Tests:** xUnit + FluentAssertions (backend), Vitest (frontend)
-- **DevOps:** Docker Compose, GitHub Actions
+- **Tests:** xUnit + FluentAssertions + WebApplicationFactory (backend), Vitest (frontend)
+- **DevOps:** Docker Compose, nginx, GitHub Actions
+
+## Quick start / Inicio rápido
+
+```bash
+docker compose up --build
+```
+
+Then open **http://localhost:4200** and sign in with a demo account (the login page has buttons for each).
+API and Swagger: **http://localhost:5000/swagger**. The first start takes a few minutes (images and SQL Server).
+*Abre http://localhost:4200 e inicia sesión con un usuario demo.*
+
+| Role | E-mail | Password |
+|---|---|---|
+| Admin | `admin@ticketflow.demo` | `Demo123!` |
+| Technician | `carlos.rivera@ticketflow.demo` | `Demo123!` |
+| Requester | `maria.lopez@ticketflow.demo` | `Demo123!` |
+
+All data is fictional. The compose file uses local demo settings; for anything else copy `.env.example` to
+`.env` and set your own SQL Server password and JWT key.
 
 ## Structure / Estructura
 
@@ -32,6 +63,9 @@ frontend/
 ---
 
 ## English
+
+The quick start above runs everything in Docker. The sections below run the API and the frontend directly,
+for development.
 
 ### Prerequisites
 
@@ -271,7 +305,58 @@ cd backend
 dotnet test
 ```
 
-Database tests use in-memory SQLite, so they don't need SQL Server.
+Database tests use in-memory SQLite, so they don't need SQL Server. Frontend: `npm test` in
+`frontend/ticketflow-web` (Vitest, no browser needed).
+
+### Docker
+
+`docker compose up --build` starts three containers:
+
+| Service | Image | Port | Notes |
+|---|---|---|---|
+| `db` | SQL Server 2022 | not published | Data in the `ticketflow-db` volume; health check with `sqlcmd` |
+| `api` | `backend/Dockerfile` (.NET 8, non-root) | 5000 | Applies migrations and the demo seed on start; `GET /health` |
+| `web` | `frontend/ticketflow-web/Dockerfile` (unprivileged nginx) | 4200 | Serves the app, proxies `/api` to the API, sends security headers |
+
+`docker compose down` stops everything (data is kept); `docker compose down -v` also deletes the database.
+
+### Continuous integration
+
+`.github/workflows/ci.yml` runs on every push and pull request: backend build and tests, a scan for
+vulnerable NuGet packages, frontend lint, tests and production build, an audit of production npm
+dependencies, and a build of both Docker images.
+
+### Technical decisions
+
+- **Clean Architecture (light):** Domain (entities, workflow rules) → Application (use cases, DTOs,
+  validation, interfaces) → Infrastructure (EF Core, JWT, BCrypt) → Api (HTTP). Business rules do not
+  depend on EF Core or ASP.NET Core, so they are unit-tested directly.
+- **Visibility as an expression:** the role rules (`TicketAccess.VisibleTo`) are an `Expression` that EF Core
+  turns into SQL, so lists, details and dashboard numbers are filtered by the database. Tickets outside
+  the user's visibility return 404 instead of 403, so ticket numbers cannot be probed.
+- **Explicit workflow:** valid status transitions live in one place in the domain
+  (`TicketStatusTransitions`); the API returns them as `allowedNextStatuses`, so the UI only offers valid
+  actions. Every change of status, priority or assignee is written to the history.
+- **No N+1 queries:** lists use projections into DTOs (one query with joins); the detail uses split
+  queries for comments and history; the dashboard uses `GROUP BY` in SQL.
+- **Errors as ProblemDetails (RFC 7807)** everywhere, including model-binding errors, so the frontend handles
+  one format. Validation messages map to the matching form fields.
+- **Stateless JWT** (60 minutes, no refresh token) checked against the database on each request, so a
+  deactivated user or a role change applies immediately.
+- **Single origin:** the browser only talks to the web server, which proxies `/api` (nginx in Docker,
+  `proxy.conf.json` in development). No CORS configuration is needed, which removes a class of mistakes.
+- **Frontend state with signals;** filters live in the URL (shareable, back button works). Charts are
+  accessible HTML tables drawn as bars instead of a chart library: one dependency less, readable by screen readers.
+
+### Roadmap
+
+- Attachments (screenshots) on tickets.
+- E-mail notifications on assignment and status changes.
+- SLA targets per priority with overdue alerts.
+- Real-time updates with SignalR.
+- Export reports to Excel/PDF.
+- Refresh tokens / single sign-on (Entra ID).
+- Deployment to Azure (App Service + Azure SQL) with infrastructure as code.
 
 ---
 
@@ -411,3 +496,37 @@ Contraseña de todas las cuentas: **`Demo123!`**
 ### Pruebas
 
 `dotnet test` desde `backend/`. Las pruebas de base de datos usan SQLite en memoria, no necesitan SQL Server.
+Frontend: `npm test` en `frontend/ticketflow-web` (Vitest, sin navegador).
+
+### Docker
+
+`docker compose up --build` levanta tres contenedores: `db` (SQL Server 2022, puerto no publicado, datos en el
+volumen `ticketflow-db`), `api` (.NET 8 sin root, puerto 5000, aplica migraciones y datos demo al iniciar,
+`GET /health`) y `web` (nginx sin privilegios, puerto 4200, sirve la app, redirige `/api` y envía cabeceras de
+seguridad). `docker compose down` los detiene conservando los datos; `docker compose down -v` borra la base.
+
+### Integración continua
+
+`.github/workflows/ci.yml` corre en cada push y pull request: compila y prueba el backend, revisa paquetes NuGet
+vulnerables, ejecuta lint, pruebas y build del frontend, audita las dependencias npm de producción y construye
+las dos imágenes Docker.
+
+### Decisiones técnicas
+
+- **Clean Architecture ligera:** Domain → Application → Infrastructure → Api. Las reglas de negocio no dependen
+  de EF Core ni de ASP.NET Core, así que se prueban directamente.
+- **Visibilidad como expresión:** las reglas por rol son una `Expression` que EF Core convierte en SQL, así que
+  la base filtra listas, detalle y dashboard. Un ticket ajeno responde 404, no 403.
+- **Flujo de estados explícito** en el dominio; la API devuelve `allowedNextStatuses` y la UI solo ofrece
+  acciones válidas. Todo cambio de estado, prioridad o asignado queda en el historial.
+- **Sin N+1:** proyecciones a DTOs, split queries en el detalle y `GROUP BY` en el dashboard.
+- **Errores como ProblemDetails (RFC 7807)** en toda la API, incluidos los de formato.
+- **JWT sin estado** (60 minutos) validado contra la base en cada petición: desactivar un usuario o cambiar su
+  rol aplica al instante.
+- **Un solo origen:** el navegador solo habla con el servidor web, que redirige `/api`; no hace falta CORS.
+- **Estado con signals** y filtros en la URL; gráficos como tablas HTML accesibles en vez de una librería.
+
+### Roadmap
+
+Adjuntos, notificaciones por correo, SLA por prioridad, tiempo real con SignalR, exportar a Excel/PDF, refresh
+tokens / SSO con Entra ID y despliegue en Azure con infraestructura como código.
