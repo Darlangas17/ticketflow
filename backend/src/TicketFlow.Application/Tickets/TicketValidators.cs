@@ -68,6 +68,10 @@ public sealed class TicketListQueryValidator : AbstractValidator<TicketListQuery
         RuleFor(q => q.Status).IsInEnum();
         RuleFor(q => q.Priority).IsInEnum();
         RuleFor(q => q.Search).MaximumLength(TicketLimits.SearchMaxLength);
+        RuleFor(q => q.AssigneeId)
+            .Null()
+            .When(q => q.Unassigned == true)
+            .WithMessage("'Assignee Id' cannot be combined with 'Unassigned'.");
         RuleFor(q => q.Sort)
             .Must(TicketSort.IsValid)
             .WithMessage($"'Sort' must be one of: {string.Join(", ", TicketSort.Allowed)}.");

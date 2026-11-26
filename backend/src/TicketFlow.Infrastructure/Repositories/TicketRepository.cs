@@ -121,6 +121,11 @@ public sealed class TicketRepository(TicketFlowDbContext db) : ITicketRepository
             tickets = tickets.Where(t => t.AssigneeId == assigneeId);
         }
 
+        if (query.Unassigned == true)
+        {
+            tickets = tickets.Where(t => t.AssigneeId == null);
+        }
+
         if (!string.IsNullOrWhiteSpace(query.Search))
         {
             // Parameterized by EF Core (no SQL injection). "123" or "#123" also matches the ticket number.

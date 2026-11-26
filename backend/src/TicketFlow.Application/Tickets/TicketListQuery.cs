@@ -16,6 +16,9 @@ public sealed record TicketListQuery
     public int? CategoryId { get; init; }
     public int? AssigneeId { get; init; }
 
+    /// <summary>True: only tickets without an assignee (cannot be combined with AssigneeId).</summary>
+    public bool? Unassigned { get; init; }
+
     /// <summary>Text to find in the title or description, or a ticket number.</summary>
     public string? Search { get; init; }
 
