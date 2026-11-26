@@ -27,7 +27,11 @@ const GENERIC_MESSAGES: Record<number, string> = {
 };
 
 function isProblemDetails(value: unknown): value is ProblemDetails {
-  return typeof value === 'object' && value !== null && ('title' in value || 'detail' in value);
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    ('title' in value || 'detail' in value || 'errors' in value)
+  );
 }
 
 /** Turns any HTTP failure into something a screen can show. */

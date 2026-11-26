@@ -1,5 +1,7 @@
 import { AbstractControl, FormGroup, ValidationErrors, ValidatorFn } from '@angular/forms';
 
+import { toApiError } from '../../core/api/api-error';
+
 // Validators shared by the forms of the app.
 
 /**
@@ -65,4 +67,26 @@ export function applyServerErrors(
     }
   }
   return unmatched;
+}
+
+/**
+ * Shows an API failure on a form: validation errors under their fields, and returns the message to
+ * show above the form (null when every error is already shown on a field). `fieldMap` renames API
+ * fields to form controls, e.g. { City: 'Detail' }.
+ */
+export function showApiError(
+  form: FormGroup,
+  error: unknown,
+  fieldMap: Record<string, string> = {},
+): string | null {
+  const apiError = toApiError(error);
+  const fieldErrors = Object.fromEntries(
+    Object.entries(apiError.fieldErrors).map(([field, messages]) => [
+      fieldMap[field] ?? field,
+      messages,
+    ]),
+  );
+  const unmatched = applyServerErrors(form, fieldErrors);
+  const allShownOnFields = Object.keys(fieldErrors).length > 0 && unmatched.length === 0;
+  return allShownOnFields ? null : (unmatched[0] ?? apiError.message);
 }

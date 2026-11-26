@@ -23,7 +23,6 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router, RouterLink } from '@angular/router';
 import { EMPTY, Observable, catchError, finalize, forkJoin, of } from 'rxjs';
 
-import { toApiError } from '../../../core/api/api-error';
 import { CatalogsApi } from '../../../core/api/catalogs.api';
 import { createLoader } from '../../../core/api/loader';
 import { TicketsApi } from '../../../core/api/tickets.api';
@@ -35,7 +34,7 @@ import {
   TicketPriority,
 } from '../../../core/models/ticket.models';
 import { ErrorState, Loading } from '../../../shared/components/load-states';
-import { applyServerErrors } from '../../../shared/forms/validators';
+import { showApiError } from '../../../shared/forms/validators';
 import { PRIORITY_LABELS } from '../../../shared/ticket-labels';
 import { HasUnsavedChanges } from '../../../shared/unsaved-changes.guard';
 import { canEditTicket } from '../ticket-permissions';
@@ -174,11 +173,7 @@ export class TicketForm implements HasUnsavedChanges {
     request$
       .pipe(
         catchError((error: unknown) => {
-          const apiError = toApiError(error);
-          const unmatched = applyServerErrors(this.form, apiError.fieldErrors);
-          const allShownOnFields =
-            Object.keys(apiError.fieldErrors).length > 0 && unmatched.length === 0;
-          this.errorMessage.set(allShownOnFields ? null : (unmatched[0] ?? apiError.message));
+          this.errorMessage.set(showApiError(this.form, error));
           return EMPTY;
         }),
         finalize(() => this.saving.set(false)),

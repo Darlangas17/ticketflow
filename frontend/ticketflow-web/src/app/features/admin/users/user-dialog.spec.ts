@@ -66,14 +66,14 @@ describe('UserDialog', () => {
     await open({ isSelf: false });
     type('fullName', ' Diego Flores ');
     type('email', 'diego.flores@ticketflow.demo');
-    type('password', 'Password123');
+    type('password', 'Strong-Pass-2026');
 
     await submit();
     const request = http.expectOne('/api/users');
     expect(request.request.body).toEqual({
       fullName: 'Diego Flores',
       email: 'diego.flores@ticketflow.demo',
-      password: 'Password123',
+      password: 'Strong-Pass-2026',
       role: 'Requester',
     });
     request.flush({ ...ANA, id: 9, fullName: 'Diego Flores' });
@@ -108,7 +108,7 @@ describe('UserDialog', () => {
     await open({ isSelf: false });
     type('fullName', 'Copy');
     type('email', 'admin@ticketflow.demo');
-    type('password', 'Password123');
+    type('password', 'Strong-Pass-2026');
 
     await submit();
     http

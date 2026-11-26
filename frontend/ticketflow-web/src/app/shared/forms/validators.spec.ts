@@ -1,6 +1,7 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { FormControl, FormGroup } from '@angular/forms';
 
-import { applyServerErrors, matchesField, passwordStrength } from './validators';
+import { applyServerErrors, matchesField, passwordStrength, showApiError } from './validators';
 
 describe('passwordStrength', () => {
   const check = (value: string) => passwordStrength(new FormControl(value));
@@ -61,5 +62,31 @@ describe('applyServerErrors', () => {
     expect(form.controls.fullName.getError('server')).toBe('Too long.');
     expect(form.controls.email.touched).toBe(true);
     expect(unmatched).toEqual(['Something else.']);
+  });
+});
+
+describe('showApiError', () => {
+  const form = () => new FormGroup({ name: new FormControl(''), detail: new FormControl('') });
+  const httpError = (status: number, error: object) => new HttpErrorResponse({ status, error });
+
+  it('puts field errors on the form and returns null when nothing else needs showing', () => {
+    const f = form();
+    const message = showApiError(f, httpError(400, { errors: { Name: ['Name is taken.'] } }));
+
+    expect(message).toBeNull();
+    expect(f.controls.name.getError('server')).toBe('Name is taken.');
+  });
+
+  it('renames API fields with the map', () => {
+    const f = form();
+    showApiError(f, httpError(400, { errors: { City: ['Too long.'] } }), { City: 'Detail' });
+
+    expect(f.controls.detail.getError('server')).toBe('Too long.');
+  });
+
+  it('returns the general message for errors without fields (e.g. 409)', () => {
+    expect(showApiError(form(), httpError(409, { detail: 'Already exists.' }))).toBe(
+      'Already exists.',
+    );
   });
 });

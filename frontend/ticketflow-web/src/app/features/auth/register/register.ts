@@ -10,13 +10,8 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Router, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
 
-import { toApiError } from '../../../core/api/api-error';
 import { AuthService } from '../../../core/auth/auth.service';
-import {
-  applyServerErrors,
-  matchesField,
-  passwordStrength,
-} from '../../../shared/forms/validators';
+import { matchesField, passwordStrength, showApiError } from '../../../shared/forms/validators';
 
 /** Self-registration: always creates a Requester account (the API ignores any other role). */
 @Component({
@@ -77,14 +72,8 @@ export class Register {
       )
       .subscribe({
         next: () => void this.router.navigateByUrl('/dashboard'),
-        error: (error: unknown) => {
-          const apiError = toApiError(error);
-          // Field errors appear under their inputs; anything else (e.g. 409 e-mail taken) on top.
-          const unmatched = applyServerErrors(this.form, apiError.fieldErrors);
-          const allShownOnFields =
-            Object.keys(apiError.fieldErrors).length > 0 && unmatched.length === 0;
-          this.errorMessage.set(allShownOnFields ? null : (unmatched[0] ?? apiError.message));
-        },
+        // Field errors appear under their inputs; anything else (e.g. 409 e-mail taken) on top.
+        error: (error: unknown) => this.errorMessage.set(showApiError(this.form, error)),
       });
   }
 }

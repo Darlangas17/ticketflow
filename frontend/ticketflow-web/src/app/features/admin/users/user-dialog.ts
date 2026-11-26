@@ -10,10 +10,9 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { EMPTY, catchError, finalize } from 'rxjs';
 
 import { AdminApi } from '../../../core/api/admin.api';
-import { toApiError } from '../../../core/api/api-error';
 import { USER_ROLES, UserRole } from '../../../core/models/auth.models';
 import { UserAccount } from '../../../core/models/user.models';
-import { applyServerErrors, passwordStrength } from '../../../shared/forms/validators';
+import { passwordStrength, showApiError } from '../../../shared/forms/validators';
 
 export interface UserDialogData {
   /** Absent when creating. */
@@ -121,11 +120,7 @@ export class UserDialog {
     request$
       .pipe(
         catchError((error: unknown) => {
-          const apiError = toApiError(error);
-          const unmatched = applyServerErrors(this.form, apiError.fieldErrors);
-          const allShownOnFields =
-            Object.keys(apiError.fieldErrors).length > 0 && unmatched.length === 0;
-          this.errorMessage.set(allShownOnFields ? null : (unmatched[0] ?? apiError.message));
+          this.errorMessage.set(showApiError(this.form, error));
           return EMPTY;
         }),
         finalize(() => this.saving.set(false)),

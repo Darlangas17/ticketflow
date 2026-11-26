@@ -8,8 +8,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { EMPTY, Observable, catchError, finalize } from 'rxjs';
 
-import { toApiError } from '../../core/api/api-error';
-import { applyServerErrors } from '../../shared/forms/validators';
+import { showApiError } from '../../shared/forms/validators';
 
 export interface CatalogFormValue {
   name: string;
@@ -135,17 +134,9 @@ export class CatalogDialog<T> {
       .save({ name: value.name.trim(), detail: value.detail.trim(), isActive: value.isActive })
       .pipe(
         catchError((error: unknown) => {
-          const apiError = toApiError(error);
-          // The API names the second field "City" or "Description"; the form calls it "detail".
-          const fieldErrors = Object.fromEntries(
-            Object.entries(apiError.fieldErrors).map(([key, messages]) => [
-              key === this.data.detailField ? 'Detail' : key,
-              messages,
-            ]),
+          this.errorMessage.set(
+            showApiError(this.form, error, { [this.data.detailField]: 'Detail' }),
           );
-          const unmatched = applyServerErrors(this.form, fieldErrors);
-          const allShownOnFields = Object.keys(fieldErrors).length > 0 && unmatched.length === 0;
-          this.errorMessage.set(allShownOnFields ? null : (unmatched[0] ?? apiError.message));
           return EMPTY;
         }),
         finalize(() => this.saving.set(false)),
