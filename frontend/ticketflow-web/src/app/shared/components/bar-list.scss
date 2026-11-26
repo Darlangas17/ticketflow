@@ -1,0 +1,77 @@
+.bars {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 6px;
+}
+
+tr {
+  cursor: default;
+}
+
+.label {
+  width: 1%;
+  padding-right: 12px;
+  text-align: left;
+  font: var(--mat-sys-body-medium);
+  white-space: nowrap;
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  a {
+    color: var(--mat-sys-on-surface);
+    text-decoration: none;
+
+    &:hover,
+    &:focus-visible {
+      color: var(--mat-sys-primary);
+      text-decoration: underline;
+    }
+  }
+}
+
+.track-cell {
+  width: 100%;
+}
+
+// The track is the same hue, much lighter: context only, never data.
+.track {
+  height: 16px;
+  border-radius: 4px;
+  background: var(--mat-sys-surface-container-high);
+  overflow: hidden;
+}
+
+.bar {
+  height: 100%;
+  border-radius: 0 4px 4px 0;
+  background: var(--mat-sys-primary);
+  transition: width 300ms ease-out;
+}
+
+.value {
+  padding-left: 12px;
+  text-align: right;
+  font: var(--mat-sys-label-large);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+tr:hover .bar {
+  background: var(--mat-sys-on-primary-container);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bar {
+    transition: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .bar {
+    background: CanvasText;
+  }
+  .track {
+    border: 1px solid CanvasText;
+  }
+}

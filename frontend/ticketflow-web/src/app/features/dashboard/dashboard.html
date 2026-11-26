@@ -1,0 +1,122 @@
+<section class="page">
+  <header class="header">
+    <div>
+      <h1 class="page-title">Dashboard</h1>
+      <p class="scope">
+        @if (user(); as user) {
+          Hello, {{ user.fullName }}.
+        }
+        {{ scope() }}
+      </p>
+    </div>
+    <div class="header-actions">
+      <button
+        mat-stroked-button
+        type="button"
+        [disabled]="summary.loading()"
+        (click)="summary.reload()"
+      >
+        <mat-icon>refresh</mat-icon>
+        Refresh
+      </button>
+      <a mat-flat-button routerLink="/tickets/new">
+        <mat-icon>add</mat-icon>
+        New ticket
+      </a>
+    </div>
+  </header>
+
+  @if (summary.loading() && summary.hasData()) {
+    <mat-progress-bar mode="indeterminate" aria-label="Updating" />
+  }
+
+  @if (summary.error(); as error) {
+    <app-error-state [message]="error" (retry)="summary.reload()" />
+  } @else if (summary.data(); as s) {
+    <ul class="kpis" aria-label="Key figures">
+      <li class="kpi">
+        <a routerLink="/tickets" class="kpi-link">
+          <span class="kpi-label">Total tickets</span>
+          <span class="kpi-value">{{ s.totalTickets | number }}</span>
+        </a>
+      </li>
+      <li class="kpi">
+        <span class="kpi-label">Active</span>
+        <span class="kpi-value">{{ s.activeTickets | number }}</span>
+        <span class="kpi-hint">Not yet resolved or closed</span>
+      </li>
+      <li class="kpi" [class.attention]="s.unassignedTickets > 0">
+        <a routerLink="/tickets" [queryParams]="{ unassigned: true }" class="kpi-link">
+          <span class="kpi-label">Unassigned</span>
+          <span class="kpi-value">{{ s.unassignedTickets | number }}</span>
+          <span class="kpi-hint">Waiting for a technician</span>
+        </a>
+      </li>
+      <li class="kpi">
+        <span class="kpi-label">Average resolution time</span>
+        <span class="kpi-value">{{ averageResolution() }}</span>
+        <span class="kpi-hint">Over {{ s.resolvedTickets | number }} resolved tickets</span>
+      </li>
+    </ul>
+
+    @if (charts(); as c) {
+      @if (s.totalTickets === 0) {
+        <mat-card appearance="outlined" class="empty">
+          <mat-card-content>
+            <p>There are no tickets yet, so there is nothing to chart.</p>
+            <a mat-flat-button routerLink="/tickets/new">Create the first ticket</a>
+          </mat-card-content>
+        </mat-card>
+      } @else {
+        <div class="charts">
+          <mat-card appearance="outlined">
+            <mat-card-header>
+              <mat-card-title><h2 class="chart-title">By status</h2></mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <app-bar-list [items]="c.status" caption="Tickets by status" labelHeader="Status" />
+            </mat-card-content>
+          </mat-card>
+
+          <mat-card appearance="outlined">
+            <mat-card-header>
+              <mat-card-title><h2 class="chart-title">By priority</h2></mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <app-bar-list
+                [items]="c.priority"
+                caption="Tickets by priority"
+                labelHeader="Priority"
+              />
+            </mat-card-content>
+          </mat-card>
+
+          <mat-card appearance="outlined">
+            <mat-card-header>
+              <mat-card-title><h2 class="chart-title">By branch</h2></mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <app-bar-list [items]="c.branch" caption="Tickets by branch" labelHeader="Branch" />
+            </mat-card-content>
+          </mat-card>
+
+          <mat-card appearance="outlined">
+            <mat-card-header>
+              <mat-card-title><h2 class="chart-title">By category</h2></mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <app-bar-list
+                [items]="c.category"
+                caption="Tickets by category"
+                labelHeader="Category"
+              />
+            </mat-card-content>
+          </mat-card>
+        </div>
+        <p class="note">Select a row to see those tickets.</p>
+      }
+    }
+  } @else {
+    <app-loading message="Loading dashboard…" />
+  }
+</section>
