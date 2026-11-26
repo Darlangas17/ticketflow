@@ -46,7 +46,13 @@ tr {
   height: 100%;
   border-radius: 0 4px 4px 0;
   background: var(--mat-sys-primary);
-  transition: width 300ms ease-out;
+  transform-origin: left center;
+  // Bars grow from the axis one after another when the chart appears; later changes slide.
+  animation: tf-grow-x 700ms var(--tf-ease-out) both;
+  animation-delay: calc(var(--row, 0) * 70ms + 200ms);
+  transition:
+    width 300ms ease-out,
+    background-color 200ms ease;
 }
 
 .value {
@@ -58,7 +64,11 @@ tr {
 }
 
 tr:hover .bar {
-  background: var(--mat-sys-on-primary-container);
+  background: color-mix(in srgb, var(--mat-sys-primary) 75%, var(--mat-sys-tertiary));
+}
+
+tr {
+  transition: background-color 150ms ease;
 }
 
 @media (prefers-reduced-motion: reduce) {

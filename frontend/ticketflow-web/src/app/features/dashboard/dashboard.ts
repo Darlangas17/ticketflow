@@ -11,8 +11,27 @@ import { createLoader } from '../../core/api/loader';
 import { AuthService } from '../../core/auth/auth.service';
 import { DashboardSummary } from '../../core/models/dashboard.models';
 import { BarItem, BarList } from '../../shared/components/bar-list';
-import { ErrorState, Loading } from '../../shared/components/load-states';
+import { ErrorState } from '../../shared/components/load-states';
 import { PRIORITY_LABELS, STATUS_LABELS } from '../../shared/ticket-labels';
+import { Skeleton } from '../../shared/components/skeleton';
+import { CountUp } from '../../shared/count-up.directive';
+
+type ChartKey = keyof ReturnType<typeof toCharts>;
+
+const CHART_CARDS: { key: ChartKey; title: string; icon: string; labelHeader: string }[] = [
+  { key: 'status', title: 'By status', icon: 'donut_large', labelHeader: 'Status' },
+  { key: 'priority', title: 'By priority', icon: 'priority_high', labelHeader: 'Priority' },
+  { key: 'branch', title: 'By branch', icon: 'store', labelHeader: 'Branch' },
+  { key: 'category', title: 'By category', icon: 'category', labelHeader: 'Category' },
+];
+
+/** "Good morning" before noon, "Good afternoon" until 6 pm, then "Good evening". */
+export function greetingFor(hour: number): string {
+  if (hour < 12) {
+    return 'Good morning';
+  }
+  return hour < 18 ? 'Good afternoon' : 'Good evening';
+}
 
 /** "37.3 h" below two days, "2.4 days" above; "—" when nothing was resolved. */
 export function formatDuration(hours: number | null): string {
@@ -54,6 +73,8 @@ export function toCharts(summary: DashboardSummary) {
 @Component({
   selector: 'app-dashboard',
   imports: [
+    Skeleton,
+    CountUp,
     DecimalPipe,
     RouterLink,
     MatButtonModule,
@@ -61,7 +82,6 @@ export function toCharts(summary: DashboardSummary) {
     MatIconModule,
     MatProgressBarModule,
     BarList,
-    Loading,
     ErrorState,
   ],
   templateUrl: './dashboard.html',
@@ -73,6 +93,9 @@ export class Dashboard {
   private readonly api = inject(DashboardApi);
 
   protected readonly user = this.auth.currentUser;
+  protected readonly firstName = computed(() => this.user()?.fullName.split(' ')[0] ?? null);
+  protected readonly greeting = signal(greetingFor(new Date().getHours()));
+  protected readonly chartCards = signal(CHART_CARDS);
   protected readonly summary = createLoader(signal(null), () => this.api.summary());
   protected readonly charts = computed(() => {
     const data = this.summary.data();

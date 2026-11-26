@@ -33,7 +33,7 @@ export interface BarItem {
         </tr>
       </thead>
       <tbody>
-        @for (row of rows(); track row.label) {
+        @for (row of rows(); track row.label; let i = $index) {
           <tr
             [matTooltip]="
               row.value + ' ' + unit(row.value) + ' · ' + (row.share | percent: '1.0-1')
@@ -50,7 +50,7 @@ export interface BarItem {
             <td class="track-cell">
               <span class="visually-hidden">{{ row.share | percent: '1.0-1' }}</span>
               <div class="track" aria-hidden="true">
-                <div class="bar" [style.width.%]="row.width"></div>
+                <div class="bar" [style.width.%]="row.width" [style.--row]="i"></div>
               </div>
             </td>
             <td class="value">{{ row.value | number }}</td>

@@ -1,14 +1,62 @@
-.header {
+// ----- Hero -----
+
+.hero {
+  position: relative;
+  overflow: hidden;
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: flex-end;
   gap: 16px;
   flex-wrap: wrap;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
+  padding: 24px;
+  border-radius: calc(var(--tf-radius) + 4px);
+  background: var(--tf-gradient-soft);
+  border: 1px solid var(--mat-sys-outline-variant);
+
+  // Soft glow in the corner.
+  &::after {
+    content: '';
+    position: absolute;
+    right: -60px;
+    top: -80px;
+    width: 240px;
+    height: 240px;
+    border-radius: 50%;
+    background: radial-gradient(
+      circle,
+      color-mix(in srgb, var(--mat-sys-primary) 22%, transparent),
+      transparent 70%
+    );
+    pointer-events: none;
+  }
 
   .page-title {
-    margin-bottom: 4px;
+    margin: 0 0 4px;
+    font: var(--mat-sys-headline-medium);
+    font-weight: 600;
   }
+
+  @media (max-width: 599.98px) {
+    padding: 18px;
+
+    .page-title {
+      font: var(--mat-sys-headline-small);
+      font-weight: 600;
+    }
+  }
+}
+
+.hero-text {
+  position: relative;
+  z-index: 1;
+}
+
+.eyebrow {
+  margin: 0 0 4px;
+  font: var(--mat-sys-label-large);
+  color: var(--mat-sys-primary);
+  letter-spacing: 0.02em;
 }
 
 .scope {
@@ -17,51 +65,79 @@
 }
 
 .header-actions {
+  position: relative;
+  z-index: 1;
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
 }
 
-mat-progress-bar {
-  margin-bottom: 8px;
+.refresh.spinning mat-icon {
+  animation: spin 900ms linear infinite;
 }
 
-// ----- KPI row -----
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+mat-progress-bar {
+  margin-bottom: 8px;
+  border-radius: 4px;
+}
+
+// ----- KPI tiles -----
 
 .kpis {
   list-style: none;
-  margin: 0 0 16px;
+  margin: 0 0 20px;
   padding: 0;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
   gap: 16px;
 
-  // Two tiles per row on phones instead of a long stack.
   @media (max-width: 599.98px) {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 8px;
+    gap: 10px;
 
     .kpi {
-      padding: 12px;
+      padding: 14px;
     }
 
     .kpi-value {
       font: var(--mat-sys-headline-medium);
+      font-weight: 600;
+    }
+
+    .kpi-hint {
+      display: none;
     }
   }
 }
 
 .kpi {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 4px;
-  padding: 16px;
+  padding: 18px;
   border: 1px solid var(--mat-sys-outline-variant);
-  border-radius: 12px;
+  border-radius: var(--tf-radius);
   background: var(--mat-sys-surface);
+  box-shadow: var(--tf-shadow-1);
+  transition:
+    transform 220ms var(--tf-ease-out),
+    box-shadow 220ms var(--tf-ease-out),
+    border-color 220ms ease;
+
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--tf-shadow-3);
+  }
 
   &.attention {
-    border-color: var(--mat-sys-primary);
+    border-color: color-mix(in srgb, var(--mat-sys-tertiary) 60%, transparent);
   }
 }
 
@@ -73,9 +149,43 @@ mat-progress-bar {
   text-decoration: none;
   border-radius: 8px;
 
+  // The whole tile is clickable.
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: var(--tf-radius);
+  }
+
   &:hover .kpi-value,
   &:focus-visible .kpi-value {
     color: var(--mat-sys-primary);
+  }
+}
+
+.kpi-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  margin-bottom: 8px;
+  border-radius: 12px;
+
+  &[data-tone='primary'] {
+    background: var(--mat-sys-primary-container);
+    color: var(--mat-sys-on-primary-container);
+  }
+  &[data-tone='secondary'] {
+    background: var(--mat-sys-secondary-container);
+    color: var(--mat-sys-on-secondary-container);
+  }
+  &[data-tone='tertiary'] {
+    background: var(--mat-sys-tertiary-container);
+    color: var(--mat-sys-on-tertiary-container);
+  }
+  &[data-tone='success'] {
+    background: light-dark(#d7f5dd, #1d3b24);
+    color: light-dark(#0b5a1f, #a6e8b4);
   }
 }
 
@@ -86,8 +196,11 @@ mat-progress-bar {
 
 .kpi-value {
   font: var(--mat-sys-display-small);
+  font-weight: 600;
+  letter-spacing: -0.02em;
   font-variant-numeric: tabular-nums;
   color: var(--mat-sys-on-surface);
+  transition: color 200ms ease;
 }
 
 .kpi-hint {
@@ -107,9 +220,27 @@ mat-progress-bar {
   }
 }
 
+.chart {
+  transition:
+    box-shadow 220ms var(--tf-ease-out),
+    transform 220ms var(--tf-ease-out);
+
+  &:hover {
+    box-shadow: var(--tf-shadow-2);
+  }
+}
+
 .chart-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   margin: 0;
   font: var(--mat-sys-title-medium);
+  font-weight: 600;
+
+  mat-icon {
+    color: var(--mat-sys-primary);
+  }
 }
 
 mat-card-content {
@@ -117,9 +248,18 @@ mat-card-content {
 }
 
 .note {
-  margin: 12px 0 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 14px 0 0;
   font: var(--mat-sys-body-small);
   color: var(--mat-sys-on-surface-variant);
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
 }
 
 .empty mat-card-content {
@@ -127,5 +267,12 @@ mat-card-content {
   flex-direction: column;
   align-items: flex-start;
   gap: 12px;
-  padding: 16px;
+  padding: 24px;
+}
+
+.empty-icon {
+  font-size: 40px;
+  width: 40px;
+  height: 40px;
+  color: var(--mat-sys-primary);
 }

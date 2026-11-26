@@ -5,7 +5,7 @@ import { provideRouter } from '@angular/router';
 
 import { signInAs } from '../../../testing/ticket-fixtures';
 import { DashboardSummary } from '../../core/models/dashboard.models';
-import { Dashboard, formatDuration, toCharts } from './dashboard';
+import { Dashboard, formatDuration, greetingFor, toCharts } from './dashboard';
 
 const SUMMARY: DashboardSummary = {
   totalTickets: 30,
@@ -43,6 +43,19 @@ describe('formatDuration', () => {
     [60, '2.5 days'],
   ])('%s → %s', (hours, expected) => {
     expect(formatDuration(hours)).toBe(expected);
+  });
+});
+
+describe('greetingFor', () => {
+  it.each([
+    [6, 'Good morning'],
+    [11, 'Good morning'],
+    [12, 'Good afternoon'],
+    [17, 'Good afternoon'],
+    [18, 'Good evening'],
+    [23, 'Good evening'],
+  ])('%i h → %s', (hour, expected) => {
+    expect(greetingFor(hour)).toBe(expected);
   });
 });
 
