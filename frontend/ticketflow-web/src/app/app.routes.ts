@@ -41,13 +41,8 @@ export const routes: Routes = [
       },
       {
         path: 'tickets',
-        title: 'Tickets · TicketFlow',
-        loadComponent: placeholder,
-        data: {
-          title: 'Tickets',
-          icon: 'confirmation_number',
-          description: 'Coming soon: the ticket list with filters, details, comments and history.',
-        },
+        loadChildren: () =>
+          import('./features/tickets/tickets.routes').then((m) => m.TICKET_ROUTES),
       },
       {
         path: 'admin',

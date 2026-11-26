@@ -1,0 +1,128 @@
+<section class="page narrow">
+  <a mat-button [routerLink]="cancelLink()" class="back">
+    <mat-icon>arrow_back</mat-icon>
+    {{ isEdit() ? 'Back to the ticket' : 'Back to tickets' }}
+  </a>
+
+  <h1 class="page-title">{{ isEdit() ? 'Edit ticket #' + id() : 'New ticket' }}</h1>
+
+  @if (data.error(); as error) {
+    @if (data.errorStatus() === 404) {
+      <app-error-state
+        message="This ticket does not exist or you do not have access to it."
+        [retryable]="false"
+      />
+    } @else {
+      <app-error-state [message]="error" (retry)="data.reload()" />
+    }
+  } @else if (data.data(); as d) {
+    @if (readOnlyReason(); as reason) {
+      <app-error-state [message]="reason" [retryable]="false" />
+    } @else {
+      <mat-card appearance="outlined">
+        <mat-card-content>
+          @if (errorMessage(); as message) {
+            <p class="notice-error" role="alert">{{ message }}</p>
+          }
+
+          <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+            <mat-form-field class="full-width">
+              <mat-label>Title</mat-label>
+              <input
+                matInput
+                formControlName="title"
+                [maxlength]="titleMaxLength"
+                placeholder="e.g. Printer offline in the warehouse"
+              />
+              <mat-hint align="end">{{ titleLength() }} / {{ titleMaxLength }}</mat-hint>
+              @if (form.controls.title.hasError('required')) {
+                <mat-error>Title is required.</mat-error>
+              } @else if (form.controls.title.hasError('server')) {
+                <mat-error>{{ form.controls.title.getError('server') }}</mat-error>
+              }
+            </mat-form-field>
+
+            <mat-form-field class="full-width">
+              <mat-label>Description</mat-label>
+              <textarea
+                matInput
+                formControlName="description"
+                cdkTextareaAutosize
+                cdkAutosizeMinRows="5"
+                cdkAutosizeMaxRows="16"
+                [maxlength]="descriptionMaxLength"
+                placeholder="What happens, since when, and what you already tried."
+              ></textarea>
+              <mat-hint align="end"
+                >{{ descriptionLength() }} / {{ descriptionMaxLength }}</mat-hint
+              >
+              @if (form.controls.description.hasError('required')) {
+                <mat-error>Description is required.</mat-error>
+              } @else if (form.controls.description.hasError('server')) {
+                <mat-error>{{ form.controls.description.getError('server') }}</mat-error>
+              }
+            </mat-form-field>
+
+            <div class="row">
+              <mat-form-field>
+                <mat-label>Priority</mat-label>
+                <mat-select formControlName="priority">
+                  @for (priority of priorities; track priority) {
+                    <mat-option [value]="priority">{{ priorityLabels[priority] }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+
+              <mat-form-field>
+                <mat-label>Category</mat-label>
+                <mat-select formControlName="categoryId">
+                  @for (category of d.categories; track category.id) {
+                    <mat-option [value]="category.id">{{ category.name }}</mat-option>
+                  }
+                </mat-select>
+                @if (form.controls.categoryId.hasError('required')) {
+                  <mat-error>Choose a category.</mat-error>
+                } @else if (form.controls.categoryId.hasError('server')) {
+                  <mat-error>{{ form.controls.categoryId.getError('server') }}</mat-error>
+                }
+              </mat-form-field>
+            </div>
+
+            @if (d.ticket; as ticket) {
+              <mat-form-field class="full-width">
+                <mat-label>Branch</mat-label>
+                <input matInput [value]="ticket.branch.name" readonly />
+                <mat-hint>The branch cannot be changed after the ticket is created.</mat-hint>
+              </mat-form-field>
+            } @else {
+              <mat-form-field class="full-width">
+                <mat-label>Branch</mat-label>
+                <mat-select formControlName="branchId">
+                  @for (branch of d.branches; track branch.id) {
+                    <mat-option [value]="branch.id"
+                      >{{ branch.name }} ({{ branch.city }})</mat-option
+                    >
+                  }
+                </mat-select>
+                @if (form.controls.branchId.hasError('required')) {
+                  <mat-error>Choose the branch where the problem is.</mat-error>
+                } @else if (form.controls.branchId.hasError('server')) {
+                  <mat-error>{{ form.controls.branchId.getError('server') }}</mat-error>
+                }
+              </mat-form-field>
+            }
+
+            <div class="actions">
+              <a mat-button [routerLink]="cancelLink()">Cancel</a>
+              <button mat-flat-button type="submit" [disabled]="saving()">
+                {{ saving() ? 'Saving…' : isEdit() ? 'Save changes' : 'Create ticket' }}
+              </button>
+            </div>
+          </form>
+        </mat-card-content>
+      </mat-card>
+    }
+  } @else {
+    <app-loading message="Loading form…" />
+  }
+</section>
