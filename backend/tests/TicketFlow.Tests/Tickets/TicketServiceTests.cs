@@ -478,6 +478,25 @@ public sealed class TicketServiceTests : IDisposable
     }
 
     [Fact]
+    public async Task Unassigned_filter_returns_only_tickets_without_assignee()
+    {
+        var unassigned = AddTicket(_requester);
+        AddTicket(_requester, _tech);
+
+        var result = await _service.ListAsync(_admin.Id, new TicketListQuery { Unassigned = true });
+
+        result.Items.Should().ContainSingle().Which.Id.Should().Be(unassigned);
+    }
+
+    [Fact]
+    public async Task Unassigned_filter_cannot_be_combined_with_an_assignee()
+    {
+        var list = () => _service.ListAsync(_admin.Id, new TicketListQuery { Unassigned = true, AssigneeId = _tech.Id });
+
+        await list.Should().ThrowAsync<ValidationException>();
+    }
+
+    [Fact]
     public async Task Search_matches_title_description_or_ticket_number()
     {
         var byTitle = AddTicket(_requester, title: "VPN keeps dropping");
