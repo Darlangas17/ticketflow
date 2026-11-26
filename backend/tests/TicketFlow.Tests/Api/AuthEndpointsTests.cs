@@ -82,7 +82,7 @@ public class AuthEndpointsTests(TicketFlowApiFactory factory) : IClassFixture<Ti
     public async Task Validation_messages_are_in_english_regardless_of_server_culture()
     {
         var response = await _client.PostAsJsonAsync(
-            "/api/auth/register", new RegisterRequest("Name", "not-an-email", "Password123"), Json);
+            "/api/auth/register", new RegisterRequest("Name", "not-an-email", "Strong-Pass-2026"), Json);
 
         var problem = await response.Content.ReadFromJsonAsync<ValidationProblemDetails>(Json);
         problem!.Errors["Email"].Should().Equal("'Email' is not a valid email address.");
@@ -127,7 +127,7 @@ public class AuthEndpointsTests(TicketFlowApiFactory factory) : IClassFixture<Ti
     [Fact]
     public async Task Register_creates_a_requester_who_can_log_in()
     {
-        var request = new RegisterRequest("Nuevo Usuario", "nuevo.usuario@ticketflow.demo", "Password123");
+        var request = new RegisterRequest("Nuevo Usuario", "nuevo.usuario@ticketflow.demo", "Strong-Pass-2026");
 
         var response = await _client.PostAsJsonAsync("/api/auth/register", request, Json);
 
@@ -148,7 +148,7 @@ public class AuthEndpointsTests(TicketFlowApiFactory factory) : IClassFixture<Ti
         {
             fullName = "Sneaky User",
             email = "sneaky@ticketflow.demo",
-            password = "Password123",
+            password = "Strong-Pass-2026",
             role = "Admin",
         });
 
@@ -161,7 +161,7 @@ public class AuthEndpointsTests(TicketFlowApiFactory factory) : IClassFixture<Ti
     public async Task Register_with_an_existing_email_returns_409()
     {
         var response = await _client.PostAsJsonAsync(
-            "/api/auth/register", new RegisterRequest("Copy", AdminEmail.ToUpperInvariant(), "Password123"), Json);
+            "/api/auth/register", new RegisterRequest("Copy", AdminEmail.ToUpperInvariant(), "Strong-Pass-2026"), Json);
 
         response.StatusCode.Should().Be(HttpStatusCode.Conflict);
     }

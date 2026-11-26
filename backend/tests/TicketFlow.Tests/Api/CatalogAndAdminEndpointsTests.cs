@@ -134,7 +134,7 @@ public class CatalogAndAdminEndpointsTests(TicketFlowApiFactory factory) : IClas
 
         (await client.GetAsync("/api/users")).StatusCode.Should().Be(HttpStatusCode.Forbidden);
         (await client.GetAsync("/api/users/1")).StatusCode.Should().Be(HttpStatusCode.Forbidden);
-        (await client.PostAsJsonAsync("/api/users", new CreateUserRequest("X", "x@ticketflow.demo", "Password123", UserRole.Admin), Json))
+        (await client.PostAsJsonAsync("/api/users", new CreateUserRequest("X", "x@ticketflow.demo", "Strong-Pass-2026", UserRole.Admin), Json))
             .StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
 
@@ -157,11 +157,11 @@ public class CatalogAndAdminEndpointsTests(TicketFlowApiFactory factory) : IClas
         var (admin, _) = await LoginAsync(AdminEmail);
 
         var created = await admin.PostAsJsonAsync(
-            "/api/users", new CreateUserRequest("Diego Flores", "diego.flores@ticketflow.demo", "Password123", UserRole.Technician), Json);
+            "/api/users", new CreateUserRequest("Diego Flores", "diego.flores@ticketflow.demo", "Strong-Pass-2026", UserRole.Technician), Json);
         created.StatusCode.Should().Be(HttpStatusCode.Created);
         var user = await ReadAsync<UserAccountDto>(created);
 
-        var (diego, me) = await LoginAsync("diego.flores@ticketflow.demo", "Password123");
+        var (diego, me) = await LoginAsync("diego.flores@ticketflow.demo", "Strong-Pass-2026");
         me.Role.Should().Be(UserRole.Technician);
         var assignees = await ReadAsync<List<UserSummaryDto>>(await diego.GetAsync("/api/users/assignees"));
         assignees.Should().Contain(new UserSummaryDto(user.Id, "Diego Flores"));
@@ -172,8 +172,8 @@ public class CatalogAndAdminEndpointsTests(TicketFlowApiFactory factory) : IClas
     {
         var (admin, _) = await LoginAsync(AdminEmail);
         var created = await ReadAsync<UserAccountDto>(await admin.PostAsJsonAsync(
-            "/api/users", new CreateUserRequest("Temp User", "temp.user@ticketflow.demo", "Password123", UserRole.Requester), Json));
-        var (temp, _) = await LoginAsync("temp.user@ticketflow.demo", "Password123");
+            "/api/users", new CreateUserRequest("Temp User", "temp.user@ticketflow.demo", "Strong-Pass-2026", UserRole.Requester), Json));
+        var (temp, _) = await LoginAsync("temp.user@ticketflow.demo", "Strong-Pass-2026");
 
         var update = await admin.PutAsJsonAsync($"/api/users/{created.Id}",
             new UpdateUserRequest("Temp User", "temp.user@ticketflow.demo", UserRole.Requester, IsActive: false), Json);

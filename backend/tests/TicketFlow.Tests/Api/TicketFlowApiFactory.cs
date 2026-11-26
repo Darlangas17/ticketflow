@@ -30,6 +30,9 @@ public sealed class TicketFlowApiFactory : WebApplicationFactory<Program>
         // "Testing" is not Development, so the API does not try to migrate SQL Server on startup.
         builder.UseEnvironment("Testing");
         builder.UseSetting("Jwt:SigningKey", TestJwt.SigningKey);
+        // Integration tests sign in many times per minute; SecurityTests checks the real limits.
+        builder.UseSetting("RateLimiting:AuthPermitLimit", "10000");
+        builder.UseSetting("RateLimiting:GlobalPermitLimit", "100000");
 
         builder.ConfigureTestServices(services =>
         {

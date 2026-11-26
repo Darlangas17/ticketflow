@@ -1,5 +1,6 @@
 using FluentAssertions;
 using FluentValidation;
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using TicketFlow.Application.Abstractions;
 using TicketFlow.Application.Auth;
@@ -30,7 +31,8 @@ public class AuthServiceTests
             tokenService,
             new RegisterRequestValidator(),
             new LoginRequestValidator(),
-            TimeProvider.System);
+            TimeProvider.System,
+            NullLogger<AuthService>.Instance);
     }
 
     private User AddUser(string email, bool isActive = true, UserRole role = UserRole.Technician)
@@ -146,6 +148,28 @@ public class AuthServiceTests
         var error = await register.Should().ThrowAsync<ValidationException>();
         error.Which.Errors.Should().Contain(e => e.PropertyName == invalidField);
         _users.Should().BeEmpty();
+    }
+
+    [Theory]
+    [InlineData("Password123")]
+    [InlineData("QWERTY123")]
+    [InlineData("contraseña1")]
+    public async Task Register_rejects_the_most_common_passwords(string password)
+    {
+        var register = () => _service.RegisterAsync(new RegisterRequest("Name", "common@ticketflow.demo", password));
+
+        var error = await register.Should().ThrowAsync<ValidationException>();
+        error.Which.Errors.Should().Contain(e => e.ErrorMessage.Contains("too common"));
+    }
+
+    [Theory]
+    [InlineData("maria.lopez@ticketflow.demo", "m***@ticketflow.demo")]
+    [InlineData("  A@b.c ", "A***@b.c")]
+    [InlineData("not-an-email", "***")]
+    [InlineData("@nouser.com", "***")]
+    public void Logged_emails_are_masked(string email, string expected)
+    {
+        AuthService.MaskEmail(email).Should().Be(expected);
     }
 
     [Fact]
