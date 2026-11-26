@@ -7,24 +7,35 @@
   padding: 48px 16px;
   text-align: center;
   color: var(--mat-sys-on-surface-variant);
+  animation: tf-fade-up var(--tf-duration) var(--tf-ease-out) both;
 
   p {
     margin: 0;
+    max-width: 420px;
   }
 }
 
+// Icon in a soft gradient circle; it pops in slightly after the text.
 .icon {
-  font-size: 48px;
-  width: 48px;
-  height: 48px;
+  box-sizing: content-box;
+  padding: 18px;
+  font-size: 40px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--tf-gradient-soft);
+  color: var(--mat-sys-primary);
+  animation: tf-scale-in 420ms var(--tf-ease-spring) 80ms both;
 }
 
 .error {
-  color: var(--mat-sys-error);
+  background: var(--mat-sys-error-container);
+  color: var(--mat-sys-on-error-container);
 }
 
 .title {
   font: var(--mat-sys-title-medium);
+  font-weight: 600;
   color: var(--mat-sys-on-surface);
 }
 
