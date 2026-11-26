@@ -1,0 +1,147 @@
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+
+  .page-title {
+    margin: 0;
+  }
+}
+
+.filters {
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.filter-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 12px;
+
+  .search {
+    grid-column: 1 / -1;
+  }
+
+  @media (min-width: 960px) {
+    .search {
+      grid-column: span 2;
+    }
+  }
+}
+
+.more-filters {
+  display: contents; // its fields stay in the filter grid
+
+  &[hidden] {
+    display: none;
+  }
+}
+
+.toggle-filters {
+  grid-column: 1 / -1;
+  justify-self: start;
+}
+
+.filter-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+
+.results {
+  overflow: hidden;
+}
+
+.summary {
+  margin: 0;
+  padding: 12px 16px;
+  font: var(--mat-sys-body-medium);
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.table-wrapper {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+}
+
+.title-cell {
+  min-width: 220px;
+
+  a {
+    display: block;
+    color: var(--mat-sys-primary);
+    font-weight: 500;
+    text-decoration: none;
+
+    &:hover,
+    &:focus-visible {
+      text-decoration: underline;
+    }
+  }
+
+  .category {
+    font: var(--mat-sys-body-small);
+    color: var(--mat-sys-on-surface-variant);
+  }
+}
+
+.muted {
+  color: var(--mat-sys-on-surface-variant);
+  font-style: italic;
+}
+
+// ----- Phone and tablet cards -----
+
+.cards {
+  list-style: none;
+  margin: 0;
+  padding: 0 12px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.card-link {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: 12px;
+  color: inherit;
+  text-decoration: none;
+
+  &:hover,
+  &:focus-visible {
+    background: var(--mat-sys-surface-container);
+  }
+}
+
+.card-top,
+.card-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.number {
+  font: var(--mat-sys-label-large);
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.card-title {
+  font: var(--mat-sys-title-medium);
+}
+
+.secondary {
+  font: var(--mat-sys-body-small);
+  color: var(--mat-sys-on-surface-variant);
+}
