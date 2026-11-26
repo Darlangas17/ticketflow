@@ -1,3 +1,4 @@
+using System.Security.Cryptography;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -24,6 +25,17 @@ public static class DependencyInjection
         // Fails at startup (not on the first login) if the JWT settings are missing or too weak.
         services.AddOptions<JwtOptions>()
             .Bind(configuration.GetSection(JwtOptions.SectionName))
+            .PostConfigure<ILoggerFactory>((jwt, loggers) =>
+            {
+                if (string.IsNullOrWhiteSpace(jwt.SigningKey) && jwt.GenerateKeyIfMissing)
+                {
+                    // 512 random bits from a CSPRNG; kept in memory only.
+                    jwt.SigningKey = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
+                    loggers.CreateLogger<JwtOptions>().LogWarning(
+                        "Jwt:SigningKey is not configured; using a random key generated at startup (local demo mode). " +
+                        "Set Jwt__SigningKey for any real deployment.");
+                }
+            })
             .ValidateDataAnnotations()
             .ValidateOnStart();
 

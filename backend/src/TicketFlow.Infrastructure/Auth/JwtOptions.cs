@@ -18,7 +18,13 @@ public sealed class JwtOptions
     /// <summary>HMAC-SHA256 secret. Must come from user secrets or an environment variable, never from the repo.</summary>
     [Required(ErrorMessage = "Jwt:SigningKey is not configured. Set it with 'dotnet user-secrets' or the Jwt__SigningKey environment variable (see README).")]
     [MinLength(32, ErrorMessage = "Jwt:SigningKey must be at least 32 characters (256 bits) long.")]
-    public string SigningKey { get; init; } = string.Empty;
+    public string SigningKey { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Local demo only (docker compose): when no SigningKey is configured, generate a random one at
+    /// startup. Tokens then stop working whenever the API restarts. Never enable it in production.
+    /// </summary>
+    public bool GenerateKeyIfMissing { get; init; }
 
     [Range(1, 24 * 60)]
     public int ExpirationMinutes { get; init; } = 60;

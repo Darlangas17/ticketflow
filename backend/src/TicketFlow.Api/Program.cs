@@ -7,6 +7,7 @@ using TicketFlow.Api.Swagger;
 using TicketFlow.Application;
 using TicketFlow.Infrastructure;
 using TicketFlow.Infrastructure.Auth;
+using TicketFlow.Infrastructure.Persistence;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -39,12 +40,16 @@ builder.Services
 builder.Services.AddTicketFlowAuthorization();
 builder.Services.AddTicketFlowSwagger();
 
+// GET /health: "Healthy" when the API is up and the database answers (used by Docker and monitoring).
+builder.Services.AddHealthChecks().AddDbContextCheck<TicketFlowDbContext>();
+
 var app = builder.Build();
 
 app.UseExceptionHandler();
 app.UseStatusCodePages(); // ProblemDetails body for empty 401/403/404 responses
 
-if (app.Environment.IsDevelopment())
+// Swagger is on in Development, or where Swagger:Enabled is true (the docker compose demo).
+if (app.Environment.IsDevelopment() || app.Configuration.GetValue<bool>("Swagger:Enabled"))
 {
     app.UseSwagger();
     app.UseSwaggerUI();
@@ -54,6 +59,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHealthChecks("/health").AllowAnonymous();
 
 // Migrations + demo seed run automatically in Development, or anywhere the
 // Database:MigrateAndSeedOnStartup setting is true (used later by Docker).
