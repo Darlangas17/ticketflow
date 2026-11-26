@@ -14,7 +14,7 @@ Every control below is backed by an automated test or a verification step that c
   stack: 98 checks covering every role and screen, on desktop and phone.
 - **API contract checks:** Postman collection, 62 requests / 112 assertions (`docs/postman`).
 - **Accessibility:** axe-core 4.10 with the `wcag2a`, `wcag2aa`, `wcag21a` and `wcag21aa` rule sets
-  on 13 screens × 2 viewports.
+  on 13 screens × 2 viewports × 2 themes.
 - **Dependency scanning:** `dotnet list package --vulnerable --include-transitive` and `npm audit`,
   both also enforced in CI.
 
@@ -59,14 +59,17 @@ Every control below is backed by an automated test or a verification step that c
 ## Accessibility (WCAG 2.1 AA)
 
 - **axe-core: 0 violations** on all 13 screens (sign-in, registration, dashboard, ticket list, detail,
-  create/edit form, users, user dialog, branches, categories, not-found) on desktop and on a phone.
+  create/edit form, users, user dialog, branches, categories, not-found) on desktop and on a phone, in both the
+  **light and dark themes** (52 audits).
 - Keyboard: a **"Skip to main content"** link is the first focusable element (2.4.1); all actions are
   buttons or links reachable with Tab; dialogs trap focus and close with Escape (Angular CDK).
 - Status and priority badges always include text (and an icon for status), never color alone (1.4.1).
 - Charts are real `<table>` elements with captions, readable by screen readers, with the value written on
   every row.
 - Form errors are linked to their fields and announced; loading and result counts use `aria-live`.
-- Page titles per route (2.4.2), `lang` attribute (3.1.1), reduced-motion preference respected.
+- Page titles per route (2.4.2), `lang` attribute (3.1.1).
+- Animations (page transitions, cascades, count-ups, growing bars, background) are short and decorative, and all
+  of them are disabled when the system asks for reduced motion (2.3.3); numbers then appear at their final value.
 - Layout works from 320 px wide without horizontal scrolling (1.4.10 Reflow).
 
 ## Known limitations and production recommendations

@@ -13,6 +13,8 @@ work on them through a defined workflow, and admins manage users, branches and c
 | ![Dashboard with key figures and charts](docs/screenshots/dashboard.jpg) | ![Ticket list with filters](docs/screenshots/ticket-list.jpg) |
 | **Ticket detail** | **User administration** |
 | ![Ticket detail with actions, comments and history](docs/screenshots/ticket-detail.jpg) | ![User administration](docs/screenshots/admin-users.jpg) |
+| **Dark mode** | **Dark mode: ticket detail** |
+| ![Dashboard in dark mode](docs/screenshots/dashboard-dark.jpg) | ![Ticket detail in dark mode](docs/screenshots/ticket-detail-dark.jpg) |
 
 <p align="center">
   <img src="docs/screenshots/mobile-tickets.jpg" alt="Ticket list on a phone" width="260">
@@ -272,6 +274,10 @@ What is in place:
   when unused) and categories (create, edit, delete when unused). API errors such as duplicate names
   appear inside the dialog.
 - Every screen handles **loading, empty and error states** (with "Try again"). Every page is lazy-loaded.
+- **Design:** light and dark themes (follows the system, or switch with the toolbar button; the choice is
+  remembered), smooth page transitions (View Transitions API), shimmering loading skeletons, cards and rows
+  that cascade in, KPI numbers that count up, chart bars that grow, and a split sign-in page with an animated
+  background. Every animation is switched off when the system asks for reduced motion.
 
 ### Postman collection
 
@@ -488,6 +494,11 @@ solo color y con el valor escrito en cada fila; al elegir una fila se abren esos
 (solo admin): usuarios (búsqueda, filtros, crear, editar, cambiar contraseña, desactivar; el admin no puede
 bloquearse a sí mismo), sucursales (crear, editar, activar/desactivar, eliminar si no tiene tickets) y
 categorías (crear, editar, eliminar si no se usan).
+
+Diseño: tema claro y oscuro (sigue al sistema o se cambia con el botón de la barra superior y se recuerda),
+transiciones suaves entre páginas, esqueletos de carga animados, tarjetas y filas que entran en cascada, cifras
+que cuentan hacia arriba, barras que crecen y una pantalla de inicio de sesión dividida con fondo animado. Todas las
+animaciones se desactivan si el sistema pide reducir el movimiento.
 
 ### Colección de Postman
 
