@@ -1,5 +1,12 @@
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
-import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  ElementRef,
+  computed,
+  inject,
+  viewChild,
+} from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDividerModule } from '@angular/material/divider';
@@ -62,6 +69,14 @@ export class Shell {
       .map((part) => part.charAt(0).toUpperCase())
       .join('');
   });
+
+  private readonly mainContent = viewChild.required<ElementRef<HTMLElement>>('mainContent');
+
+  /** Skip link (WCAG 2.4.1): moves keyboard focus past the navigation to the page content. */
+  protected skipToContent(event: Event): void {
+    event.preventDefault();
+    this.mainContent().nativeElement.focus();
+  }
 
   protected logout(): void {
     this.auth.logout();

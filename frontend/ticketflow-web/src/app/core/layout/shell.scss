@@ -1,3 +1,29 @@
+.skip-link {
+  position: absolute;
+  left: 8px;
+  top: -48px;
+  z-index: 1000;
+  padding: 8px 16px;
+  border-radius: 8px;
+  background: var(--mat-sys-primary);
+  color: var(--mat-sys-on-primary);
+  font: var(--mat-sys-label-large);
+  text-decoration: none;
+  transition: top 150ms ease-out;
+
+  &:focus {
+    top: 8px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+  }
+}
+
+.main:focus {
+  outline: none; // focused only programmatically by the skip link
+}
+
 .container {
   height: 100vh;
 }
