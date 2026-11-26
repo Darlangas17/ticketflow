@@ -1,4 +1,5 @@
 using FluentValidation;
+using Microsoft.Extensions.Logging;
 using TicketFlow.Application.Abstractions;
 using TicketFlow.Application.Common.Exceptions;
 using TicketFlow.Domain.Entities;
@@ -21,7 +22,8 @@ public sealed class AuthService(
     ITokenService tokenService,
     IValidator<RegisterRequest> registerValidator,
     IValidator<LoginRequest> loginValidator,
-    TimeProvider timeProvider) : IAuthService
+    TimeProvider timeProvider,
+    ILogger<AuthService> logger) : IAuthService
 {
     // Same message for unknown e-mail and wrong password, so the API does not reveal which e-mails exist.
     public const string InvalidCredentialsMessage = "Invalid email or password.";
@@ -48,6 +50,7 @@ public sealed class AuthService(
         };
 
         await users.AddAsync(user, cancellationToken);
+        logger.LogInformation("Account {UserId} registered", user.Id);
         return CreateResponse(user);
     }
 
@@ -61,15 +64,19 @@ public sealed class AuthService(
         var passwordIsValid = passwordHasher.Verify(request.Password, user?.PasswordHash);
         if (user is null || !passwordIsValid)
         {
+            // Security log (OWASP A09): never the password, and the e-mail only masked.
+            logger.LogWarning("Failed sign-in for {Email}", MaskEmail(request.Email));
             throw new UnauthorizedException(InvalidCredentialsMessage);
         }
 
         // Only reported after the password is verified, so it doesn't leak account state.
         if (!user.IsActive)
         {
+            logger.LogWarning("Sign-in attempt to disabled account {UserId}", user.Id);
             throw new ForbiddenException(DisabledAccountMessage);
         }
 
+        logger.LogInformation("User {UserId} signed in", user.Id);
         return CreateResponse(user);
     }
 
@@ -83,6 +90,14 @@ public sealed class AuthService(
         }
 
         return UserDto.FromEntity(user);
+    }
+
+    /// <summary>"maria.lopez@ticketflow.demo" → "m***@ticketflow.demo": enough to spot an attack pattern, not a full address.</summary>
+    public static string MaskEmail(string email)
+    {
+        var trimmed = email.Trim();
+        var at = trimmed.LastIndexOf('@');
+        return at <= 0 ? "***" : $"{trimmed[0]}***{trimmed[at..]}";
     }
 
     private AuthResponse CreateResponse(User user)
