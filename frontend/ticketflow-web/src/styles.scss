@@ -1,13 +1,19 @@
 @use '@angular/material' as mat;
 
-// Material 3 theme. Every component uses the system tokens (--mat-sys-*), so colors stay consistent.
+// ============================================================================================
+// Theme
+// Material 3 tokens (--mat-sys-*) in light and dark. `theme-type: color-scheme` makes every token
+// follow the CSS `color-scheme` property: "light dark" follows the operating system, and
+// ThemeService forces "light" or "dark" when the user picks one.
+// ============================================================================================
 html {
-  color-scheme: light;
+  color-scheme: light dark;
   @include mat.theme(
     (
       color: (
         primary: mat.$azure-palette,
         tertiary: mat.$violet-palette,
+        theme-type: color-scheme,
       ),
       typography: Roboto,
       density: 0,
@@ -20,6 +26,25 @@ html {
       container-shape: 0,
     )
   );
+
+  // ----- Brand tokens (used on top of the Material ones) -----
+  --tf-gradient: linear-gradient(
+    135deg,
+    var(--mat-sys-primary) 0%,
+    color-mix(in srgb, var(--mat-sys-primary) 55%, var(--mat-sys-tertiary)) 100%
+  );
+  --tf-gradient-soft: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--mat-sys-primary-container) 80%, transparent),
+    color-mix(in srgb, var(--mat-sys-tertiary-container) 80%, transparent)
+  );
+  --tf-radius: 16px;
+  --tf-shadow-1: 0 1px 2px rgb(0 0 0 / 0.06), 0 1px 3px rgb(0 0 0 / 0.08);
+  --tf-shadow-2: 0 4px 12px rgb(0 0 0 / 0.08), 0 2px 4px rgb(0 0 0 / 0.06);
+  --tf-shadow-3: 0 12px 32px rgb(0 0 0 / 0.12), 0 4px 8px rgb(0 0 0 / 0.06);
+  --tf-ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --tf-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --tf-duration: 320ms;
 }
 
 html,
@@ -32,10 +57,31 @@ body {
   font-family: Roboto, 'Helvetica Neue', sans-serif;
   background: var(--mat-sys-surface-container-lowest);
   color: var(--mat-sys-on-surface);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: background-color 250ms ease;
 }
 
-// ----- Small shared utilities -----
+::selection {
+  background: var(--mat-sys-primary-container);
+  color: var(--mat-sys-on-primary-container);
+}
 
+// Keyboard focus is always visible (WCAG 2.4.7), mouse clicks don't draw a ring.
+:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--mat-sys-primary) 60%, transparent);
+  outline-offset: 2px;
+}
+
+// Cards: softer corners and a subtle shadow everywhere.
+.mat-mdc-card {
+  --mat-card-outlined-container-shape: var(--tf-radius);
+  --mat-card-elevated-container-shape: var(--tf-radius);
+}
+
+// ============================================================================================
+// Layout utilities
+// ============================================================================================
 .page {
   padding: 24px;
   max-width: 1200px;
@@ -49,6 +95,8 @@ body {
 
 .page-title {
   font: var(--mat-sys-headline-small);
+  font-weight: 500;
+  letter-spacing: -0.01em;
   margin: 0 0 16px;
 }
 
@@ -71,4 +119,125 @@ body {
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border: 0;
+}
+
+// Text filled with the brand gradient (headings, numbers).
+.gradient-text {
+  background: var(--tf-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+// ============================================================================================
+// Motion
+// Small, purposeful animations: elements enter with a short fade/slide, lists cascade with a
+// per-item delay (set --i on each item), skeletons shimmer while data loads.
+// ============================================================================================
+@keyframes tf-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes tf-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+
+@keyframes tf-scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+}
+
+@keyframes tf-grow-x {
+  from {
+    transform: scaleX(0);
+  }
+}
+
+@keyframes tf-shimmer {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+@keyframes tf-float {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(24px, -18px) scale(1.06);
+  }
+}
+
+.animate-in {
+  animation: tf-fade-up var(--tf-duration) var(--tf-ease-out) both;
+}
+
+.animate-fade {
+  animation: tf-fade-in var(--tf-duration) ease both;
+}
+
+.animate-scale {
+  animation: tf-scale-in var(--tf-duration) var(--tf-ease-out) both;
+}
+
+// Cascade: each item waits a little longer (capped so long lists do not feel slow).
+.stagger {
+  animation: tf-fade-up var(--tf-duration) var(--tf-ease-out) both;
+  animation-delay: calc(min(var(--i, 0), 12) * 40ms);
+}
+
+// Lift on hover for clickable surfaces.
+.hover-lift {
+  transition:
+    transform 200ms var(--tf-ease-out),
+    box-shadow 200ms var(--tf-ease-out),
+    border-color 200ms ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--tf-shadow-2);
+  }
+}
+
+// ----- Page transitions (View Transitions API, enabled in app.config.ts) -----
+::view-transition-old(root) {
+  animation: 140ms ease-in both tf-fade-out-down;
+}
+
+::view-transition-new(root) {
+  animation: 220ms var(--tf-ease-out) 60ms both tf-fade-up;
+}
+
+@keyframes tf-fade-out-down {
+  to {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+// Respect the "reduce motion" system setting (WCAG 2.3.3): no movement at all.
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    animation-delay: 0ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
 }

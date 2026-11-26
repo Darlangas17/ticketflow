@@ -6,6 +6,9 @@
   border-radius: 12px;
   font: var(--mat-sys-label-medium);
   white-space: nowrap;
+  transition:
+    background-color 250ms ease,
+    color 250ms ease;
   background: var(--mat-sys-surface-container-high);
   color: var(--mat-sys-on-surface);
 
@@ -30,8 +33,9 @@
   color: var(--mat-sys-on-tertiary-container);
 }
 [data-status='Resolved'] {
-  background: #d7f5dd;
-  color: #0b5a1f;
+  // Green has no Material system token; light/dark pairs keep the text contrast above 4.5:1.
+  background: light-dark(#d7f5dd, #1d3b24);
+  color: light-dark(#0b5a1f, #a6e8b4);
 }
 [data-status='Closed'] {
   background: var(--mat-sys-surface-container-highest);
@@ -48,8 +52,8 @@
   color: var(--mat-sys-on-secondary-container);
 }
 [data-priority='High'] {
-  background: #ffe0b8;
-  color: #6b3a00;
+  background: light-dark(#ffe0b8, #4a2c06);
+  color: light-dark(#6b3a00, #ffd29a);
 }
 [data-priority='Critical'] {
   background: var(--mat-sys-error-container);
