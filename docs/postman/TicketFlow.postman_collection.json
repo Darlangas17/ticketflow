@@ -2858,7 +2858,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"fullName\": \"Copy\",\n  \"email\": \"ADMIN@ticketflow.demo\",\n  \"password\": \"Password123\",\n  \"role\": \"Technician\"\n}",
+              "raw": "{\n  \"fullName\": \"Copy\",\n  \"email\": \"ADMIN@ticketflow.demo\",\n  \"password\": \"Strong-Pass-2026\",\n  \"role\": \"Technician\"\n}",
               "options": {
                 "raw": {
                   "language": "json"

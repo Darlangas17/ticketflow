@@ -148,7 +148,8 @@ With the API running in Development, open **http://localhost:5000/swagger**.
 
 Every endpoint requires a valid token unless it is marked as public. Errors use
 [ProblemDetails](https://www.rfc-editor.org/rfc/rfc7807): 400 validation, 401 invalid credentials or token,
-403 disabled account, 409 e-mail already registered.
+403 disabled account, 409 e-mail already registered, 429 too many sign-in attempts (10 per minute per client,
+configurable with `RateLimiting:AuthPermitLimit`).
 
 ### Tickets
 
@@ -348,6 +349,14 @@ dependencies, and a build of both Docker images.
 - **Frontend state with signals;** filters live in the URL (shareable, back button works). Charts are
   accessible HTML tables drawn as bars instead of a chart library: one dependency less, readable by screen readers.
 
+### Security and accessibility
+
+The project was audited against OWASP Top 10 (2021), OWASP ASVS 4.0 level 2, NIST SP 800-63B and WCAG 2.1
+AA. Highlights: role-based access enforced in SQL, BCrypt + HMAC-SHA256 JWT, rate-limited sign-in (429),
+strict Content-Security-Policy and security headers, no third-party requests (fonts are bundled), masked
+security logs, non-root containers, 0 vulnerable dependencies, and 0 axe-core accessibility violations on
+every screen. Full report, evidence and production recommendations: **[docs/SECURITY.md](docs/SECURITY.md)**.
+
 ### Roadmap
 
 - Attachments (screenshots) on tickets.
@@ -525,6 +534,13 @@ las dos imágenes Docker.
   rol aplica al instante.
 - **Un solo origen:** el navegador solo habla con el servidor web, que redirige `/api`; no hace falta CORS.
 - **Estado con signals** y filtros en la URL; gráficos como tablas HTML accesibles en vez de una librería.
+
+### Seguridad y accesibilidad
+
+Auditado contra OWASP Top 10 (2021), OWASP ASVS 4.0 nivel 2, NIST SP 800-63B y WCAG 2.1 AA: acceso por rol en
+SQL, BCrypt y JWT HMAC-SHA256, límite de intentos de inicio de sesión (429), CSP estricta y cabeceras de seguridad,
+sin peticiones a terceros, registros de seguridad con el correo enmascarado, contenedores sin root, 0 dependencias
+vulnerables y 0 infracciones de accesibilidad. Informe completo: **[docs/SECURITY.md](docs/SECURITY.md)**.
 
 ### Roadmap
 
