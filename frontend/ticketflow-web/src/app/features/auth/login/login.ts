@@ -21,6 +21,8 @@ import { finalize } from 'rxjs';
 import { toApiError } from '../../../core/api/api-error';
 import { safeReturnUrl } from '../../../core/auth/auth.guards';
 import { AuthService } from '../../../core/auth/auth.service';
+import { ThemeToggle } from '../../../shared/components/theme-toggle';
+import { AuthHero } from '../auth-hero';
 import { UserRole } from '../../../core/models/auth.models';
 
 interface DemoAccount {
@@ -40,6 +42,8 @@ export const DEMO_PASSWORD = 'Demo123!';
 @Component({
   selector: 'app-login',
   imports: [
+    AuthHero,
+    ThemeToggle,
     ReactiveFormsModule,
     RouterLink,
     MatCardModule,

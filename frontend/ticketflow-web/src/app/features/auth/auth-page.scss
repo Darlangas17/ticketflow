@@ -1,45 +1,141 @@
-// Shared by the login and register pages.
+// Shared by the login and register pages: split layout with a hero panel (large screens) and
+// the form card, over a softly animated background.
 
 .auth-page {
+  position: relative;
+  isolation: isolate;
   min-height: 100vh;
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  align-items: center;
+  gap: 48px;
+  padding: 32px clamp(16px, 5vw, 72px);
+  box-sizing: border-box;
+  overflow: hidden;
+  background: var(--mat-sys-surface-container-lowest);
+
+  @media (max-width: 959.98px) {
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+    gap: 24px;
+    padding: 72px 16px 32px;
+  }
+}
+
+// ----- Animated background -----
+
+.bg {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: 0.55;
+  animation: tf-float 16s ease-in-out infinite;
+
+  &.b1 {
+    width: 420px;
+    height: 420px;
+    left: -120px;
+    top: -120px;
+    background: var(--mat-sys-primary-container);
+  }
+
+  &.b2 {
+    width: 360px;
+    height: 360px;
+    right: -100px;
+    bottom: -120px;
+    background: var(--mat-sys-tertiary-container);
+    animation-delay: -6s;
+    animation-duration: 19s;
+  }
+
+  &.b3 {
+    width: 260px;
+    height: 260px;
+    left: 40%;
+    top: 55%;
+    background: color-mix(in srgb, var(--mat-sys-primary) 30%, transparent);
+    animation-delay: -11s;
+    animation-duration: 22s;
+  }
+}
+
+.theme {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+}
+
+// ----- Form side -----
+
+.panel {
+  width: 100%;
+  max-width: 440px;
+  justify-self: start;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 24px;
-  padding: 24px 16px;
-  box-sizing: border-box;
-  background: var(--mat-sys-surface-container);
+  gap: 20px;
+
+  @media (max-width: 959.98px) {
+    justify-self: center;
+  }
 }
 
 .auth-card {
   width: 100%;
-  max-width: 420px;
-  padding: 8px;
+  padding: 12px;
+  box-sizing: border-box;
+  background: color-mix(in srgb, var(--mat-sys-surface) 88%, transparent);
+  backdrop-filter: blur(16px);
+  box-shadow: var(--tf-shadow-3);
+  animation: tf-scale-in 500ms var(--tf-ease-out) 100ms both;
 }
 
-.logo {
-  color: var(--mat-sys-primary);
-  font-size: 40px;
-  width: 40px;
-  height: 40px;
+.card-logo {
+  display: none;
+  margin-bottom: 8px;
+
+  @media (max-width: 959.98px) {
+    display: inline-grid;
+  }
 }
 
 .title {
-  font: inherit;
+  font: var(--mat-sys-headline-small);
+  font-weight: 600;
+  letter-spacing: -0.01em;
   margin: 0;
+}
+
+.subtitle {
+  margin: 4px 0 0;
+  color: var(--mat-sys-on-surface-variant);
 }
 
 form {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  margin-top: 16px;
+  margin-top: 20px;
 }
 
 .submit {
-  height: 44px;
+  height: 48px;
   margin-top: 8px;
+  font-size: 15px;
+  transition: transform 150ms var(--tf-ease-out);
+
+  &:not([disabled]):active {
+    transform: scale(0.98);
+  }
 
   mat-spinner {
     margin: 0 auto;
@@ -49,27 +145,50 @@ form {
 .notice {
   margin: 16px 0 0;
   padding: 12px 16px;
-  border-radius: 8px;
+  border-radius: 12px;
   font: var(--mat-sys-body-medium);
   background: var(--mat-sys-secondary-container);
   color: var(--mat-sys-on-secondary-container);
+  animation: tf-fade-up 260ms var(--tf-ease-out) both;
 }
 
+// Shakes once to draw attention to a failed attempt.
 .notice-error {
   background: var(--mat-sys-error-container);
   color: var(--mat-sys-on-error-container);
+  animation: shake 420ms ease both;
+}
+
+@keyframes shake {
+  20%,
+  60% {
+    transform: translateX(-6px);
+  }
+  40%,
+  80% {
+    transform: translateX(6px);
+  }
 }
 
 .switch {
-  margin: 16px 0 0;
+  margin: 20px 0 4px;
   text-align: center;
   font: var(--mat-sys-body-medium);
+
+  a {
+    color: var(--mat-sys-primary);
+    font-weight: 500;
+  }
 }
 
+// ----- Demo accounts -----
+
 .demo {
-  width: 100%;
-  max-width: 420px;
-  text-align: center;
+  padding: 16px;
+  border-radius: var(--tf-radius);
+  border: 1px dashed var(--mat-sys-outline-variant);
+  background: color-mix(in srgb, var(--mat-sys-surface) 70%, transparent);
+  animation: tf-fade-up 500ms var(--tf-ease-out) 250ms both;
 }
 
 .demo-title {
@@ -84,11 +203,46 @@ form {
 }
 
 .demo-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+
+  @media (max-width: 479.98px) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.demo-button {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  align-items: flex-start;
+  gap: 2px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--mat-sys-outline-variant);
+  background: var(--mat-sys-surface);
+  color: var(--mat-sys-on-surface);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    transform 180ms var(--tf-ease-out),
+    border-color 180ms ease,
+    box-shadow 180ms ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    border-color: var(--mat-sys-primary);
+    box-shadow: var(--tf-shadow-2);
+  }
 }
 
 .demo-role {
-  font-weight: 500;
+  font: var(--mat-sys-label-large);
+  color: var(--mat-sys-primary);
+}
+
+.demo-name {
+  font: var(--mat-sys-body-small);
+  color: var(--mat-sys-on-surface-variant);
 }

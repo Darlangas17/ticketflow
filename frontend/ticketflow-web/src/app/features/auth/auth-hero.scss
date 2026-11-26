@@ -1,0 +1,95 @@
+// Hero panel of the sign-in and register pages (component host = the panel).
+
+:host {
+  display: block;
+  max-width: 560px;
+  justify-self: end;
+  animation: tf-fade-up 600ms var(--tf-ease-out) both;
+
+  @media (max-width: 959.98px) {
+    display: none;
+  }
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 28px;
+  font: var(--mat-sys-title-large);
+  font-weight: 600;
+}
+
+.logo {
+  display: inline-grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: var(--tf-gradient);
+  color: var(--mat-sys-on-primary);
+  box-shadow: var(--tf-shadow-2);
+}
+
+.hero-title {
+  margin: 0 0 16px;
+  font: var(--mat-sys-display-small);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+}
+
+.hero-lead {
+  margin: 0 0 28px;
+  font: var(--mat-sys-body-large);
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.features {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 14px;
+
+  li {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    font: var(--mat-sys-body-medium);
+  }
+
+  strong {
+    display: block;
+    font: var(--mat-sys-title-small);
+  }
+
+  span {
+    color: var(--mat-sys-on-surface-variant);
+  }
+}
+
+.feature-icon {
+  display: inline-grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--mat-sys-surface) 70%, transparent);
+  border: 1px solid var(--mat-sys-outline-variant);
+  color: var(--mat-sys-primary);
+
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+}
+
+.gradient-text {
+  background: var(--tf-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}

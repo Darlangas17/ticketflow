@@ -1,77 +1,94 @@
 <div class="auth-page">
-  <mat-card class="auth-card" appearance="outlined">
-    <mat-card-header>
-      <mat-icon mat-card-avatar class="logo" aria-hidden="true">support_agent</mat-icon>
-      <mat-card-title><h1 class="title">Sign in to TicketFlow</h1></mat-card-title>
-      <mat-card-subtitle>IT support tickets for every branch</mat-card-subtitle>
-    </mat-card-header>
+  <div class="bg" aria-hidden="true">
+    <span class="blob b1"></span>
+    <span class="blob b2"></span>
+    <span class="blob b3"></span>
+  </div>
+  <app-theme-toggle class="theme" />
 
-    <mat-card-content>
-      @if (sessionExpired()) {
-        <p class="notice" role="status">Your session has expired. Please sign in again.</p>
-      }
-      @if (errorMessage(); as message) {
-        <p class="notice notice-error" role="alert">{{ message }}</p>
-      }
+  <app-auth-hero />
 
-      <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
-        <mat-form-field class="full-width">
-          <mat-label>E-mail</mat-label>
-          <input matInput formControlName="email" type="email" autocomplete="username" />
-          @if (form.controls.email.hasError('required')) {
-            <mat-error>E-mail is required.</mat-error>
-          } @else if (form.controls.email.hasError('email')) {
-            <mat-error>Enter a valid e-mail address.</mat-error>
-          }
-        </mat-form-field>
+  <div class="panel">
+    <mat-card class="auth-card" appearance="outlined">
+      <mat-card-content>
+        <span class="logo card-logo" aria-hidden="true"><mat-icon>support_agent</mat-icon></span>
+        <h1 class="title">Welcome back</h1>
+        <p class="subtitle">Sign in to TicketFlow to manage your tickets.</p>
 
-        <mat-form-field class="full-width">
-          <mat-label>Password</mat-label>
-          <input
-            matInput
-            formControlName="password"
-            [type]="hidePassword() ? 'password' : 'text'"
-            autocomplete="current-password"
-          />
-          <button
-            mat-icon-button
-            matSuffix
-            type="button"
-            [attr.aria-label]="hidePassword() ? 'Show password' : 'Hide password'"
-            [attr.aria-pressed]="!hidePassword()"
-            (click)="hidePassword.set(!hidePassword())"
-          >
-            <mat-icon>{{ hidePassword() ? 'visibility' : 'visibility_off' }}</mat-icon>
+        @if (sessionExpired()) {
+          <p class="notice" role="status">Your session has expired. Please sign in again.</p>
+        }
+        @if (errorMessage(); as message) {
+          <p class="notice notice-error" role="alert">{{ message }}</p>
+        }
+
+        <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+          <mat-form-field class="full-width">
+            <mat-label>E-mail</mat-label>
+            <mat-icon matPrefix aria-hidden="true">mail</mat-icon>
+            <input matInput formControlName="email" type="email" autocomplete="username" />
+            @if (form.controls.email.hasError('required')) {
+              <mat-error>E-mail is required.</mat-error>
+            } @else if (form.controls.email.hasError('email')) {
+              <mat-error>Enter a valid e-mail address.</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field class="full-width">
+            <mat-label>Password</mat-label>
+            <mat-icon matPrefix aria-hidden="true">lock</mat-icon>
+            <input
+              matInput
+              formControlName="password"
+              [type]="hidePassword() ? 'password' : 'text'"
+              autocomplete="current-password"
+            />
+            <button
+              mat-icon-button
+              matSuffix
+              type="button"
+              [attr.aria-label]="hidePassword() ? 'Show password' : 'Hide password'"
+              [attr.aria-pressed]="!hidePassword()"
+              (click)="hidePassword.set(!hidePassword())"
+            >
+              <mat-icon>{{ hidePassword() ? 'visibility' : 'visibility_off' }}</mat-icon>
+            </button>
+            @if (form.controls.password.hasError('required')) {
+              <mat-error>Password is required.</mat-error>
+            }
+          </mat-form-field>
+
+          <button mat-flat-button class="full-width submit" type="submit" [disabled]="loading()">
+            @if (loading()) {
+              <mat-spinner diameter="20" aria-label="Signing in" />
+            } @else {
+              Sign in
+            }
           </button>
-          @if (form.controls.password.hasError('required')) {
-            <mat-error>Password is required.</mat-error>
-          }
-        </mat-form-field>
+        </form>
 
-        <button mat-flat-button class="full-width submit" type="submit" [disabled]="loading()">
-          @if (loading()) {
-            <mat-spinner diameter="20" aria-label="Signing in" />
-          } @else {
-            Sign in
-          }
-        </button>
-      </form>
+        <p class="switch">Don't have an account? <a routerLink="/register">Create one</a></p>
+      </mat-card-content>
+    </mat-card>
 
-      <p class="switch">Don't have an account? <a routerLink="/register">Create one</a></p>
-    </mat-card-content>
-  </mat-card>
-
-  <section class="demo" aria-labelledby="demo-title">
-    <h2 id="demo-title" class="demo-title">Demo accounts</h2>
-    <p class="demo-hint">
-      Fictional users. Pick one to fill in the form (password <code>Demo123!</code>).
-    </p>
-    <div class="demo-list">
-      @for (account of demoAccounts; track account.email) {
-        <button mat-stroked-button type="button" (click)="useDemoAccount(account)">
-          <span class="demo-role">{{ account.role }}</span> · {{ account.name }}
-        </button>
-      }
-    </div>
-  </section>
+    <section class="demo" aria-labelledby="demo-title">
+      <h2 id="demo-title" class="demo-title">Try a demo account</h2>
+      <p class="demo-hint">
+        Fictional users. Pick one to fill in the form (password <code>Demo123!</code>).
+      </p>
+      <div class="demo-list">
+        @for (account of demoAccounts; track account.email) {
+          <button
+            type="button"
+            class="demo-button"
+            [attr.aria-label]="account.role + ' · ' + account.name"
+            (click)="useDemoAccount(account)"
+          >
+            <span class="demo-role">{{ account.role }}</span>
+            <span class="demo-name">{{ account.name }}</span>
+          </button>
+        }
+      </div>
+    </section>
+  </div>
 </div>

@@ -11,12 +11,16 @@ import { Router, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
 
 import { AuthService } from '../../../core/auth/auth.service';
+import { ThemeToggle } from '../../../shared/components/theme-toggle';
+import { AuthHero } from '../auth-hero';
 import { matchesField, passwordStrength, showApiError } from '../../../shared/forms/validators';
 
 /** Self-registration: always creates a Requester account (the API ignores any other role). */
 @Component({
   selector: 'app-register',
   imports: [
+    AuthHero,
+    ThemeToggle,
     ReactiveFormsModule,
     RouterLink,
     MatCardModule,
