@@ -35,6 +35,8 @@ services:
       Jwt__GenerateKeyIfMissing: "true"
       Database__MigrateAndSeedOnStartup: "true"
       Swagger__Enabled: "true"
+      # Trust X-Forwarded-For only from the Docker network (nginx), so rate limits see the real client IP.
+      ForwardedHeaders__KnownNetworks__0: "172.16.0.0/12"
     ports:
       - "5000:8080"
     depends_on:

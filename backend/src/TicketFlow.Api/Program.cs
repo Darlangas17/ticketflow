@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Options;
 using TicketFlow.Api.Auth;
 using TicketFlow.Api.ErrorHandling;
+using TicketFlow.Api.Security;
 using TicketFlow.Api.Swagger;
 using TicketFlow.Application;
 using TicketFlow.Infrastructure;
@@ -10,6 +11,7 @@ using TicketFlow.Infrastructure.Auth;
 using TicketFlow.Infrastructure.Persistence;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.WebHost.ConfigureTicketFlowKestrel();
 
 builder.Services
     .AddApplication()
@@ -38,6 +40,7 @@ builder.Services
     });
 
 builder.Services.AddTicketFlowAuthorization();
+builder.Services.AddTicketFlowSecurity(builder.Configuration);
 builder.Services.AddTicketFlowSwagger();
 
 // GET /health: "Healthy" when the API is up and the database answers (used by Docker and monitoring).
@@ -45,6 +48,8 @@ builder.Services.AddHealthChecks().AddDbContextCheck<TicketFlowDbContext>();
 
 var app = builder.Build();
 
+// First, so every response (errors included) gets the security headers and the real client IP is known.
+app.UseTicketFlowSecurity();
 app.UseExceptionHandler();
 app.UseStatusCodePages(); // ProblemDetails body for empty 401/403/404 responses
 
@@ -56,6 +61,7 @@ if (app.Environment.IsDevelopment() || app.Configuration.GetValue<bool>("Swagger
 }
 
 app.UseAuthentication();
+app.UseRateLimiter(); // after authentication, so limits can be per user
 app.UseAuthorization();
 
 app.MapControllers();
