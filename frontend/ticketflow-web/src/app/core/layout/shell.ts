@@ -19,6 +19,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { map } from 'rxjs';
 
+import { ThemeToggle } from '../../shared/components/theme-toggle';
 import { AuthService } from '../auth/auth.service';
 import { navigationFor } from './navigation';
 
@@ -37,6 +38,7 @@ import { navigationFor } from './navigation';
     MatMenuModule,
     MatDividerModule,
     MatTooltipModule,
+    ThemeToggle,
   ],
   templateUrl: './shell.html',
   styleUrl: './shell.scss',

@@ -8,35 +8,50 @@
     [opened]="!isHandset()"
     [attr.role]="isHandset() ? 'dialog' : 'navigation'"
   >
-    <div class="brand">
-      <mat-icon class="brand-icon" aria-hidden="true">support_agent</mat-icon>
-      <span>TicketFlow</span>
-    </div>
+    <div class="sidenav-inner">
+      <a class="brand" routerLink="/dashboard" (click)="isHandset() && drawer.close()">
+        <span class="logo" aria-hidden="true"><mat-icon>support_agent</mat-icon></span>
+        <span class="brand-text">
+          <span class="brand-name">TicketFlow</span>
+          <span class="brand-tagline">IT support</span>
+        </span>
+      </a>
 
-    <nav aria-label="Main navigation">
-      @for (section of sections(); track $index) {
-        @if (section.title) {
-          <mat-divider />
-          <h2 class="section-title">{{ section.title }}</h2>
-        }
-        <mat-nav-list>
-          @for (item of section.items; track item.path) {
-            <a
-              mat-list-item
-              [routerLink]="item.path"
-              routerLinkActive="active-link"
-              #link="routerLinkActive"
-              [activated]="link.isActive"
-              [attr.aria-current]="link.isActive ? 'page' : null"
-              (click)="isHandset() && drawer.close()"
-            >
-              <mat-icon matListItemIcon aria-hidden="true">{{ item.icon }}</mat-icon>
-              <span matListItemTitle>{{ item.label }}</span>
-            </a>
+      <nav aria-label="Main navigation">
+        @for (section of sections(); track $index) {
+          @if (section.title) {
+            <h2 class="section-title">{{ section.title }}</h2>
           }
-        </mat-nav-list>
+          <mat-nav-list>
+            @for (item of section.items; track item.path) {
+              <a
+                mat-list-item
+                class="nav-item"
+                [routerLink]="item.path"
+                routerLinkActive="active-link"
+                #link="routerLinkActive"
+                [activated]="link.isActive"
+                [attr.aria-current]="link.isActive ? 'page' : null"
+                (click)="isHandset() && drawer.close()"
+              >
+                <mat-icon matListItemIcon aria-hidden="true">{{ item.icon }}</mat-icon>
+                <span matListItemTitle>{{ item.label }}</span>
+              </a>
+            }
+          </mat-nav-list>
+        }
+      </nav>
+
+      @if (user(); as user) {
+        <div class="sidenav-user">
+          <span class="avatar large" aria-hidden="true">{{ initials() }}</span>
+          <span class="sidenav-user-text">
+            <span class="sidenav-user-name">{{ user.fullName }}</span>
+            <span class="role-badge" [attr.data-role]="user.role">{{ user.role }}</span>
+          </span>
+        </div>
       }
-    </nav>
+    </div>
   </mat-sidenav>
 
   <mat-sidenav-content class="content">
@@ -50,9 +65,14 @@
         >
           <mat-icon>menu</mat-icon>
         </button>
-        <span class="toolbar-title">TicketFlow</span>
+        <span class="toolbar-title">
+          <span class="logo small" aria-hidden="true"><mat-icon>support_agent</mat-icon></span>
+          TicketFlow
+        </span>
       }
       <span class="spacer"></span>
+
+      <app-theme-toggle />
 
       @if (user(); as user) {
         <button
@@ -66,14 +86,17 @@
           @if (!isHandset()) {
             <span class="user-name">{{ user.fullName }}</span>
           }
-          <mat-icon iconPositionEnd>arrow_drop_down</mat-icon>
+          <mat-icon iconPositionEnd>expand_more</mat-icon>
         </button>
 
-        <mat-menu #userMenu="matMenu" xPosition="before">
+        <mat-menu #userMenu="matMenu" xPosition="before" class="user-menu">
           <div class="menu-header" role="presentation">
-            <div class="menu-name">{{ user.fullName }}</div>
-            <div class="menu-email">{{ user.email }}</div>
-            <div class="role-badge" [attr.data-role]="user.role">{{ user.role }}</div>
+            <span class="avatar large" aria-hidden="true">{{ initials() }}</span>
+            <div>
+              <div class="menu-name">{{ user.fullName }}</div>
+              <div class="menu-email">{{ user.email }}</div>
+              <div class="role-badge" [attr.data-role]="user.role">{{ user.role }}</div>
+            </div>
           </div>
           <mat-divider />
           <button mat-menu-item type="button" (click)="logout()">
