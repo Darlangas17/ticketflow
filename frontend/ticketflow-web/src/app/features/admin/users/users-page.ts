@@ -29,12 +29,14 @@ import { createLoader } from '../../../core/api/loader';
 import { AuthService } from '../../../core/auth/auth.service';
 import { USER_ROLES, UserRole } from '../../../core/models/auth.models';
 import { UserAccount, UserListQuery } from '../../../core/models/user.models';
-import { EmptyState, ErrorState, Loading } from '../../../shared/components/load-states';
+import { EmptyState, ErrorState } from '../../../shared/components/load-states';
 import { UserDialog, UserDialogData } from './user-dialog';
+import { Skeleton } from '../../../shared/components/skeleton';
 
 @Component({
   selector: 'app-users-page',
   imports: [
+    Skeleton,
     DatePipe,
     ReactiveFormsModule,
     MatButtonModule,
@@ -47,7 +49,6 @@ import { UserDialog, UserDialogData } from './user-dialog';
     MatSelectModule,
     MatTableModule,
     MatTooltipModule,
-    Loading,
     ErrorState,
     EmptyState,
   ],

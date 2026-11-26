@@ -16,25 +16,26 @@ import { CatalogsApi } from '../../../core/api/catalogs.api';
 import { createLoader } from '../../../core/api/loader';
 import { Branch } from '../../../core/models/catalog.models';
 import { confirm } from '../../../shared/components/confirm-dialog';
-import { EmptyState, ErrorState, Loading } from '../../../shared/components/load-states';
+import { EmptyState, ErrorState } from '../../../shared/components/load-states';
 import { CatalogDialog, CatalogDialogData, CatalogFormValue } from '../catalog-dialog';
+import { Skeleton } from '../../../shared/components/skeleton';
 
 @Component({
   selector: 'app-branches-page',
   imports: [
+    Skeleton,
     MatButtonModule,
     MatCardModule,
     MatIconModule,
     MatProgressBarModule,
     MatTableModule,
     MatTooltipModule,
-    Loading,
     ErrorState,
     EmptyState,
   ],
   template: `
     <section class="page">
-      <header class="header">
+      <header class="header animate-in">
         <h1 class="page-title">Branches</h1>
         <button mat-flat-button type="button" (click)="create()">
           <mat-icon>add_business</mat-icon>
@@ -42,7 +43,7 @@ import { CatalogDialog, CatalogDialogData, CatalogFormValue } from '../catalog-d
         </button>
       </header>
 
-      <mat-card appearance="outlined" class="results">
+      <mat-card appearance="outlined" class="results animate-in">
         @if (busy() || (branches.loading() && branches.hasData())) {
           <mat-progress-bar mode="indeterminate" aria-label="Saving" />
         }
@@ -111,14 +112,16 @@ import { CatalogDialog, CatalogDialogData, CatalogFormValue } from '../catalog-d
                 <tr mat-header-row *matHeaderRowDef="columns"></tr>
                 <tr
                   mat-row
-                  *matRowDef="let row; columns: columns"
+                  *matRowDef="let row; columns: columns; let i = index"
+                  class="stagger"
+                  [style.--i]="i"
                   [class.dimmed]="!row.isActive"
                 ></tr>
               </table>
             </div>
           }
         } @else {
-          <app-loading message="Loading branches…" />
+          <app-skeleton [rows]="3" message="Loading branches…" />
         }
       </mat-card>
       <p class="footnote">

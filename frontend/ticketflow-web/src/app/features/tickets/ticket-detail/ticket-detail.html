@@ -18,7 +18,7 @@
       <mat-progress-bar mode="indeterminate" class="acting" aria-label="Saving" />
     }
 
-    <header class="header">
+    <header class="header animate-in">
       <div>
         <p class="number">Ticket #{{ t.id }}</p>
         <h1 class="page-title">{{ t.title }}</h1>
@@ -51,7 +51,7 @@
 
     <div class="layout">
       <div class="main">
-        <mat-card appearance="outlined">
+        <mat-card appearance="outlined" class="stagger" style="--i: 1">
           <mat-card-header>
             <mat-card-title><h2 class="card-heading">Description</h2></mat-card-title>
           </mat-card-header>
@@ -60,7 +60,7 @@
           </mat-card-content>
         </mat-card>
 
-        <mat-card appearance="outlined">
+        <mat-card appearance="outlined" class="stagger" style="--i: 2">
           <mat-card-header>
             <mat-card-title>
               <h2 class="card-heading">Comments ({{ t.comments.length }})</h2>
@@ -72,14 +72,19 @@
             } @else {
               <ol class="comments">
                 @for (comment of t.comments; track comment.id) {
-                  <li class="comment" [class.own]="comment.author.id === user()?.id">
-                    <div class="comment-meta">
-                      <strong>{{ comment.author.fullName }}</strong>
-                      <time [attr.datetime]="comment.createdAt">
-                        {{ comment.createdAt | date: 'MMM d, y, h:mm a' }}
-                      </time>
+                  <li class="comment animate-in" [class.own]="comment.author.id === user()?.id">
+                    <span class="comment-avatar" aria-hidden="true">
+                      {{ initialsOf(comment.author.fullName) }}
+                    </span>
+                    <div class="comment-content">
+                      <div class="comment-meta">
+                        <strong>{{ comment.author.fullName }}</strong>
+                        <time [attr.datetime]="comment.createdAt">
+                          {{ comment.createdAt | date: 'MMM d, y, h:mm a' }}
+                        </time>
+                      </div>
+                      <p class="comment-body">{{ comment.body }}</p>
                     </div>
-                    <p class="comment-body">{{ comment.body }}</p>
                   </li>
                 }
               </ol>
@@ -119,7 +124,7 @@
 
       <aside class="side" aria-label="Ticket details and actions">
         @if (transitions().length > 0 || canAssign()) {
-          <mat-card appearance="outlined">
+          <mat-card appearance="outlined" class="stagger" style="--i: 3">
             <mat-card-header>
               <mat-card-title><h2 class="card-heading">Actions</h2></mat-card-title>
             </mat-card-header>
@@ -169,7 +174,7 @@
           </mat-card>
         }
 
-        <mat-card appearance="outlined">
+        <mat-card appearance="outlined" class="stagger" style="--i: 4">
           <mat-card-header>
             <mat-card-title><h2 class="card-heading">Details</h2></mat-card-title>
           </mat-card-header>
@@ -195,7 +200,7 @@
           </mat-card-content>
         </mat-card>
 
-        <mat-card appearance="outlined">
+        <mat-card appearance="outlined" class="stagger" style="--i: 5">
           <mat-card-header>
             <mat-card-title><h2 class="card-heading">History</h2></mat-card-title>
           </mat-card-header>
@@ -204,8 +209,8 @@
               <p class="muted">No changes yet.</p>
             } @else {
               <ol class="history">
-                @for (entry of t.history; track entry.id) {
-                  <li>
+                @for (entry of t.history; track entry.id; let i = $index) {
+                  <li class="stagger" [style.--i]="i" [attr.data-field]="entry.field">
                     <span>
                       <strong>{{ entry.changedBy.fullName }}</strong> {{ describeHistory(entry) }}
                     </span>
@@ -221,6 +226,6 @@
       </aside>
     </div>
   } @else {
-    <app-loading message="Loading ticket…" />
+    <app-skeleton variant="detail" message="Loading ticket…" />
   }
 </section>

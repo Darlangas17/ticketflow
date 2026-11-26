@@ -36,10 +36,11 @@ import {
   TicketSort,
   TicketSortField,
 } from '../../../core/models/ticket.models';
-import { EmptyState, ErrorState, Loading } from '../../../shared/components/load-states';
+import { EmptyState, ErrorState } from '../../../shared/components/load-states';
 import { PriorityBadge, StatusBadge } from '../../../shared/components/ticket-badges';
 import { PRIORITY_LABELS, STATUS_LABELS } from '../../../shared/ticket-labels';
 import { PAGE_SIZE_OPTIONS, hasFilters, parseTicketQuery, toQueryParams } from '../ticket-query';
+import { Skeleton } from '../../../shared/components/skeleton';
 
 /** Value of the assignee filter: any, unassigned, or a user id. */
 type AssigneeFilter = '' | 'unassigned' | `${number}`;
@@ -57,6 +58,7 @@ const SORT_OPTIONS: { value: TicketSort; label: string }[] = [
 @Component({
   selector: 'app-ticket-list',
   imports: [
+    Skeleton,
     DatePipe,
     ReactiveFormsModule,
     RouterLink,
@@ -73,7 +75,6 @@ const SORT_OPTIONS: { value: TicketSort; label: string }[] = [
     MatTooltipModule,
     StatusBadge,
     PriorityBadge,
-    Loading,
     ErrorState,
     EmptyState,
   ],

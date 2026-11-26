@@ -1,5 +1,5 @@
 <section class="page">
-  <header class="header">
+  <header class="header animate-in">
     <h1 class="page-title">Users</h1>
     <button mat-flat-button type="button" (click)="create()">
       <mat-icon>person_add</mat-icon>
@@ -7,7 +7,7 @@
     </button>
   </header>
 
-  <mat-card appearance="outlined" class="filters">
+  <mat-card appearance="outlined" class="filters animate-in">
     <div class="filter-grid" role="search" aria-label="Filter users">
       <mat-form-field class="search" subscriptSizing="dynamic">
         <mat-label>Search</mat-label>
@@ -34,7 +34,7 @@
     </div>
   </mat-card>
 
-  <mat-card appearance="outlined" class="results">
+  <mat-card appearance="outlined" class="results animate-in">
     @if (users.loading() && users.hasData()) {
       <mat-progress-bar mode="indeterminate" aria-label="Updating results" />
     }
@@ -109,7 +109,9 @@
             <tr mat-header-row *matHeaderRowDef="columns()"></tr>
             <tr
               mat-row
-              *matRowDef="let row; columns: columns()"
+              *matRowDef="let row; columns: columns(); let i = index"
+              class="stagger"
+              [style.--i]="i"
               [class.dimmed]="!row.isActive"
             ></tr>
           </table>
@@ -124,7 +126,7 @@
         />
       }
     } @else {
-      <app-loading message="Loading users…" />
+      <app-skeleton message="Loading users…" />
     }
   </mat-card>
 </section>

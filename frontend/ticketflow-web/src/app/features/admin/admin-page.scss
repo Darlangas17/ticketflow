@@ -44,6 +44,14 @@ table {
   width: 100%;
 }
 
+tr.mat-mdc-row {
+  transition: background-color 150ms ease;
+
+  &:hover {
+    background: color-mix(in srgb, var(--mat-sys-primary) 5%, transparent);
+  }
+}
+
 .primary-text {
   display: block;
   font-weight: 500;

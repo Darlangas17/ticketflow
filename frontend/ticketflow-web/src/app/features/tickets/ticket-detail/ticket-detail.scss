@@ -19,6 +19,8 @@
 
   .page-title {
     margin: 0 0 8px;
+    font: var(--mat-sys-headline-medium);
+    font-weight: 600;
     overflow-wrap: anywhere;
   }
 }
@@ -96,14 +98,46 @@ mat-card-content {
 }
 
 .comment {
-  padding: 12px;
-  border-radius: 12px;
-  background: var(--mat-sys-surface-container);
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
 
   &.own {
-    background: var(--mat-sys-primary-container);
-    color: var(--mat-sys-on-primary-container);
+    flex-direction: row-reverse;
+
+    .comment-content {
+      background: var(--mat-sys-primary-container);
+      color: var(--mat-sys-on-primary-container);
+      border-top-right-radius: 4px;
+      border-top-left-radius: 16px;
+    }
+
+    .comment-avatar {
+      background: var(--tf-gradient);
+      color: var(--mat-sys-on-primary);
+    }
   }
+}
+
+.comment-avatar {
+  display: inline-grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--mat-sys-secondary-container);
+  color: var(--mat-sys-on-secondary-container);
+  font: var(--mat-sys-label-large);
+}
+
+.comment-content {
+  flex: 1;
+  min-width: 0;
+  padding: 10px 14px;
+  border-radius: 16px;
+  border-top-left-radius: 4px;
+  background: var(--mat-sys-surface-container);
 }
 
 .comment-meta {
@@ -144,20 +178,53 @@ mat-card-content {
   }
 }
 
+// Vertical timeline: a line with a dot per change, colored by what changed.
 .history {
+  position: relative;
   list-style: none;
   margin: 0;
-  padding: 0 0 0 16px;
-  border-left: 2px solid var(--mat-sys-outline-variant);
+  padding: 0 0 0 22px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 14px;
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: 6px;
+    top: 6px;
+    bottom: 6px;
+    width: 2px;
+    border-radius: 2px;
+    background: var(--mat-sys-outline-variant);
+  }
 
   li {
+    position: relative;
     display: flex;
     flex-direction: column;
     gap: 2px;
     font: var(--mat-sys-body-medium);
+
+    &::before {
+      content: '';
+      position: absolute;
+      left: -22px;
+      top: 4px;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--mat-sys-surface);
+      border: 2px solid var(--mat-sys-primary);
+    }
+
+    &[data-field='Priority']::before {
+      border-color: var(--mat-sys-tertiary);
+    }
+
+    &[data-field='Assignee']::before {
+      border-color: var(--mat-sys-secondary);
+    }
   }
 
   time {

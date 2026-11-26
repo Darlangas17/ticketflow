@@ -34,7 +34,7 @@ import { AuthService } from '../../../core/auth/auth.service';
 import { User } from '../../../core/models/auth.models';
 import { TicketDetails, TicketStatus } from '../../../core/models/ticket.models';
 import { confirm } from '../../../shared/components/confirm-dialog';
-import { ErrorState, Loading } from '../../../shared/components/load-states';
+import { ErrorState } from '../../../shared/components/load-states';
 import { PriorityBadge, StatusBadge } from '../../../shared/components/ticket-badges';
 import {
   STATUS_ICONS,
@@ -49,12 +49,14 @@ import {
   canEditTicket,
 } from '../ticket-permissions';
 import { describeHistory } from './history-text';
+import { Skeleton } from '../../../shared/components/skeleton';
 
 const COMMENT_MAX_LENGTH = 2000;
 
 @Component({
   selector: 'app-ticket-detail',
   imports: [
+    Skeleton,
     DatePipe,
     TextFieldModule,
     ReactiveFormsModule,
@@ -70,7 +72,6 @@ const COMMENT_MAX_LENGTH = 2000;
     MatTooltipModule,
     StatusBadge,
     PriorityBadge,
-    Loading,
     ErrorState,
   ],
   templateUrl: './ticket-detail.html',
@@ -121,6 +122,16 @@ export class TicketDetail {
 
   protected readonly describeHistory = describeHistory;
   protected readonly statusIcons = STATUS_ICONS;
+
+  /** "Maria Lopez" → "ML" for the comment avatars. */
+  protected initialsOf(name: string): string {
+    return name
+      .split(/\s+/)
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((part) => part.charAt(0).toUpperCase())
+      .join('');
+  }
 
   protected transitionText(to: TicketStatus): string {
     const from = this.ticket.data()?.status;

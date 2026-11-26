@@ -1,5 +1,5 @@
 <section class="page">
-  <header class="header">
+  <header class="header animate-in">
     <h1 class="page-title">{{ title() }}</h1>
     <a mat-flat-button routerLink="/tickets/new">
       <mat-icon>add</mat-icon>
@@ -7,7 +7,7 @@
     </a>
   </header>
 
-  <mat-card appearance="outlined" class="filters">
+  <mat-card appearance="outlined" class="filters animate-in">
     <form [formGroup]="filters" class="filter-grid" role="search" aria-label="Filter tickets">
       <mat-form-field class="search" subscriptSizing="dynamic">
         <mat-label>Search</mat-label>
@@ -119,7 +119,7 @@
     }
   </mat-card>
 
-  <mat-card appearance="outlined" class="results">
+  <mat-card appearance="outlined" class="results animate-in">
     @if (tickets.loading() && tickets.hasData()) {
       <mat-progress-bar mode="indeterminate" aria-label="Updating results" />
     }
@@ -127,7 +127,7 @@
     @if (tickets.error(); as error) {
       <app-error-state [message]="error" (retry)="tickets.reload()" />
     } @else if (!tickets.hasData()) {
-      <app-loading message="Loading tickets…" />
+      <app-skeleton [variant]="isHandset() ? 'cards' : 'table'" message="Loading tickets…" />
     } @else if (tickets.data(); as page) {
       <p class="summary" aria-live="polite">
         {{ page.totalCount }} {{ page.totalCount === 1 ? 'ticket' : 'tickets' }}
@@ -157,8 +157,8 @@
       } @else if (isHandset()) {
         <ul class="cards" aria-label="Tickets">
           @for (ticket of page.items; track ticket.id) {
-            <li>
-              <a class="card-link" [routerLink]="['/tickets', ticket.id]">
+            <li class="stagger" [style.--i]="$index">
+              <a class="card-link hover-lift" [routerLink]="['/tickets', ticket.id]">
                 <div class="card-top">
                   <span class="number">#{{ ticket.id }}</span>
                   <app-priority-badge [priority]="ticket.priority" />
@@ -241,7 +241,12 @@
             </ng-container>
 
             <tr mat-header-row *matHeaderRowDef="columns()"></tr>
-            <tr mat-row *matRowDef="let row; columns: columns()"></tr>
+            <tr
+              mat-row
+              *matRowDef="let row; columns: columns(); let i = index"
+              class="stagger"
+              [style.--i]="i"
+            ></tr>
           </table>
         </div>
       }
