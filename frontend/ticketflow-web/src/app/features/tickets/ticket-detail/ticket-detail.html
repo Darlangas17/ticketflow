@@ -1,0 +1,226 @@
+<section class="page">
+  <a mat-button routerLink="/tickets" class="back">
+    <mat-icon>arrow_back</mat-icon>
+    Back to tickets
+  </a>
+
+  @if (ticket.error(); as error) {
+    @if (ticket.errorStatus() === 404) {
+      <app-error-state
+        message="This ticket does not exist or you do not have access to it."
+        [retryable]="false"
+      />
+    } @else {
+      <app-error-state [message]="error" (retry)="ticket.reload()" />
+    }
+  } @else if (ticket.data(); as t) {
+    @if (acting()) {
+      <mat-progress-bar mode="indeterminate" class="acting" aria-label="Saving" />
+    }
+
+    <header class="header">
+      <div>
+        <p class="number">Ticket #{{ t.id }}</p>
+        <h1 class="page-title">{{ t.title }}</h1>
+        <div class="badges">
+          <app-status-badge [status]="t.status" />
+          <app-priority-badge [priority]="t.priority" />
+        </div>
+      </div>
+      <div class="header-actions">
+        @if (canEdit()) {
+          <a mat-stroked-button [routerLink]="['/tickets', t.id, 'edit']">
+            <mat-icon>edit</mat-icon>
+            Edit
+          </a>
+        }
+        @if (canDelete()) {
+          <button
+            mat-stroked-button
+            type="button"
+            class="danger"
+            [disabled]="acting()"
+            (click)="deleteTicket()"
+          >
+            <mat-icon>delete</mat-icon>
+            Delete
+          </button>
+        }
+      </div>
+    </header>
+
+    <div class="layout">
+      <div class="main">
+        <mat-card appearance="outlined">
+          <mat-card-header>
+            <mat-card-title><h2 class="card-heading">Description</h2></mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <p class="description">{{ t.description }}</p>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card appearance="outlined">
+          <mat-card-header>
+            <mat-card-title>
+              <h2 class="card-heading">Comments ({{ t.comments.length }})</h2>
+            </mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            @if (t.comments.length === 0) {
+              <p class="muted">No comments yet.</p>
+            } @else {
+              <ol class="comments">
+                @for (comment of t.comments; track comment.id) {
+                  <li class="comment" [class.own]="comment.author.id === user()?.id">
+                    <div class="comment-meta">
+                      <strong>{{ comment.author.fullName }}</strong>
+                      <time [attr.datetime]="comment.createdAt">
+                        {{ comment.createdAt | date: 'MMM d, y, h:mm a' }}
+                      </time>
+                    </div>
+                    <p class="comment-body">{{ comment.body }}</p>
+                  </li>
+                }
+              </ol>
+            }
+
+            @if (canComment()) {
+              <form [formGroup]="commentForm" (ngSubmit)="addComment()" class="comment-form">
+                <mat-form-field class="full-width">
+                  <mat-label>Add a comment</mat-label>
+                  <textarea
+                    matInput
+                    formControlName="body"
+                    rows="3"
+                    [maxlength]="commentMaxLength"
+                    cdkTextareaAutosize
+                  ></textarea>
+                  <mat-hint align="end">
+                    {{ commentForm.controls.body.value.length }} / {{ commentMaxLength }}
+                  </mat-hint>
+                  @if (commentForm.controls.body.hasError('required')) {
+                    <mat-error>Write something before sending.</mat-error>
+                  }
+                </mat-form-field>
+                <div class="form-actions">
+                  <button mat-flat-button type="submit" [disabled]="sendingComment()">
+                    <mat-icon>send</mat-icon>
+                    {{ sendingComment() ? 'Sending…' : 'Send comment' }}
+                  </button>
+                </div>
+              </form>
+            } @else {
+              <p class="muted">Closed tickets cannot receive new comments.</p>
+            }
+          </mat-card-content>
+        </mat-card>
+      </div>
+
+      <aside class="side" aria-label="Ticket details and actions">
+        @if (transitions().length > 0 || canAssign()) {
+          <mat-card appearance="outlined">
+            <mat-card-header>
+              <mat-card-title><h2 class="card-heading">Actions</h2></mat-card-title>
+            </mat-card-header>
+            <mat-card-content class="actions">
+              @for (status of transitions(); track status) {
+                <button
+                  mat-flat-button
+                  type="button"
+                  [disabled]="acting()"
+                  (click)="changeStatus(status)"
+                >
+                  <mat-icon>{{ statusIcons[status] }}</mat-icon>
+                  {{ transitionText(status) }}
+                </button>
+              }
+
+              @if (canAssign()) {
+                @if (transitions().length > 0) {
+                  <mat-divider />
+                }
+                <mat-form-field class="full-width" subscriptSizing="dynamic">
+                  <mat-label>Assignee</mat-label>
+                  <mat-select
+                    [value]="t.assignee?.id ?? null"
+                    [disabled]="acting()"
+                    (selectionChange)="assign($event.value)"
+                  >
+                    <mat-option [value]="null">Unassigned</mat-option>
+                    @for (person of assignees(); track person.id) {
+                      <mat-option [value]="person.id">{{ person.fullName }}</mat-option>
+                    }
+                  </mat-select>
+                </mat-form-field>
+                @if (!assignedToMe()) {
+                  <button
+                    mat-stroked-button
+                    type="button"
+                    [disabled]="acting()"
+                    (click)="assignToMe()"
+                  >
+                    <mat-icon>person_add</mat-icon>
+                    Assign to me
+                  </button>
+                }
+              }
+            </mat-card-content>
+          </mat-card>
+        }
+
+        <mat-card appearance="outlined">
+          <mat-card-header>
+            <mat-card-title><h2 class="card-heading">Details</h2></mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <dl class="details">
+              <dt>Category</dt>
+              <dd>{{ t.category.name }}</dd>
+              <dt>Branch</dt>
+              <dd>{{ t.branch.name }}</dd>
+              <dt>Requester</dt>
+              <dd>{{ t.requester.fullName }}</dd>
+              <dt>Assignee</dt>
+              <dd [class.muted]="!t.assignee">{{ t.assignee?.fullName ?? 'Unassigned' }}</dd>
+              <dt>Created</dt>
+              <dd>{{ t.createdAt | date: 'MMM d, y, h:mm a' }}</dd>
+              <dt>Last update</dt>
+              <dd>{{ t.updatedAt | date: 'MMM d, y, h:mm a' }}</dd>
+              @if (t.resolvedAt) {
+                <dt>Resolved</dt>
+                <dd>{{ t.resolvedAt | date: 'MMM d, y, h:mm a' }}</dd>
+              }
+            </dl>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card appearance="outlined">
+          <mat-card-header>
+            <mat-card-title><h2 class="card-heading">History</h2></mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            @if (t.history.length === 0) {
+              <p class="muted">No changes yet.</p>
+            } @else {
+              <ol class="history">
+                @for (entry of t.history; track entry.id) {
+                  <li>
+                    <span>
+                      <strong>{{ entry.changedBy.fullName }}</strong> {{ describeHistory(entry) }}
+                    </span>
+                    <time [attr.datetime]="entry.changedAt">
+                      {{ entry.changedAt | date: 'MMM d, y, h:mm a' }}
+                    </time>
+                  </li>
+                }
+              </ol>
+            }
+          </mat-card-content>
+        </mat-card>
+      </aside>
+    </div>
+  } @else {
+    <app-loading message="Loading ticket…" />
+  }
+</section>
