@@ -228,6 +228,14 @@ What is in place:
   Closing and deleting ask for confirmation.
 - **Create/edit form** with the API's limits, character counters, server errors on each field and a warning
   before leaving with unsaved changes.
+- **Dashboard** with key figures (total, active, unassigned, average resolution time) and bar charts by
+  status, priority, branch and category. Each chart is an accessible table drawn as bars, in one color,
+  with the value written on every row; selecting a row opens the matching tickets. Admins see company-wide
+  numbers; technicians and requesters see the numbers of the tickets they can see.
+- **Administration** (admins only): users (search, role/status filters, create, edit, reset password,
+  deactivate; an admin cannot lock themselves out), branches (create, edit, activate/deactivate, delete
+  when unused) and categories (create, edit, delete when unused). API errors such as duplicate names
+  appear inside the dialog.
 - Every screen handles **loading, empty and error states** (with "Try again"). Every page is lazy-loaded.
 
 ### Postman collection
@@ -379,6 +387,13 @@ historial y solo las acciones permitidas (cambios de estado válidos, asignar, e
 eliminar, con confirmación al cerrar o eliminar); y formulario de crear/editar con los límites de la API,
 errores por campo y aviso antes de salir con cambios sin guardar. Todas las pantallas manejan carga,
 vacío y error con "Try again", y todas las páginas se cargan con lazy loading.
+
+Dashboard: cifras clave (total, activos, sin asignar, tiempo promedio de resolución) y gráficos de barras
+por estado, prioridad, sucursal y categoría. Cada gráfico es una tabla accesible dibujada como barras, de un
+solo color y con el valor escrito en cada fila; al elegir una fila se abren esos tickets. Administración
+(solo admin): usuarios (búsqueda, filtros, crear, editar, cambiar contraseña, desactivar; el admin no puede
+bloquearse a sí mismo), sucursales (crear, editar, activar/desactivar, eliminar si no tiene tickets) y
+categorías (crear, editar, eliminar si no se usan).
 
 ### Colección de Postman
 
