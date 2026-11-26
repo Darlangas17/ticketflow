@@ -220,8 +220,15 @@ What is in place:
   (no open redirects).
 - **Responsive layout** with navigation by role: Admins see the Administration section; requesters see
   "My tickets". On phones the menu becomes a drawer.
-- Every page is **lazy-loaded**. Ticket, dashboard and administration screens are placeholders until the
-  next phases.
+- **Ticket list** with search, filters (status, priority, branch, category, assignee/unassigned), sortable
+  columns and pagination. Filters live in the URL, so they survive a reload, work with the back button and
+  can be shared. Phones get cards and collapsible filters instead of the table.
+- **Ticket detail** with description, comments, history and the actions the user is allowed to take:
+  workflow buttons (only valid transitions), assignment ("Assign to me"), editing and, for admins, deleting.
+  Closing and deleting ask for confirmation.
+- **Create/edit form** with the API's limits, character counters, server errors on each field and a warning
+  before leaving with unsaved changes.
+- Every screen handles **loading, empty and error states** (with "Try again"). Every page is lazy-loaded.
 
 ### Postman collection
 
@@ -364,9 +371,14 @@ Comandos: `npm start` (desarrollo), `npm test` (pruebas con Vitest), `npm run li
 Incluye: login y registro con formularios reactivos; `AuthService` con signals y sesión guardada en
 `localStorage` (se valida con `/api/auth/me` al iniciar y se cierra sola al expirar el token); interceptor que
 agrega el JWT solo a `/api` y cierra la sesión ante un 401; guards `authGuard`, `guestGuard` y
-`roleGuard('Admin')` con `canMatch`; y un layout responsive con navegación según el rol. Todas las páginas
-se cargan con lazy loading. Tickets, dashboard y administración son páginas provisionales hasta las
-siguientes fases.
+`roleGuard('Admin')` con `canMatch`; y un layout responsive con navegación según el rol.
+
+Tickets: lista con búsqueda, filtros, orden y paginación (los filtros quedan en la URL, así sobreviven a una
+recarga y al botón atrás; en el teléfono se ven tarjetas y filtros plegables); detalle con comentarios,
+historial y solo las acciones permitidas (cambios de estado válidos, asignar, editar y, para el admin,
+eliminar, con confirmación al cerrar o eliminar); y formulario de crear/editar con los límites de la API,
+errores por campo y aviso antes de salir con cambios sin guardar. Todas las pantallas manejan carga,
+vacío y error con "Try again", y todas las páginas se cargan con lazy loading.
 
 ### Colección de Postman
 
