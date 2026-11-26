@@ -104,16 +104,14 @@ describe('Register', () => {
     fill({});
 
     await submit();
-    http
-      .expectOne('/api/auth/register')
-      .flush(
-        {
-          status: 400,
-          title: 'One or more validation errors occurred.',
-          errors: { Email: ["'Email' is not a valid email address."] },
-        },
-        { status: 400, statusText: 'Bad Request' },
-      );
+    http.expectOne('/api/auth/register').flush(
+      {
+        status: 400,
+        title: 'One or more validation errors occurred.',
+        errors: { Email: ["'Email' is not a valid email address."] },
+      },
+      { status: 400, statusText: 'Bad Request' },
+    );
     await fixture.whenStable();
 
     expect(errors()).toEqual(["'Email' is not a valid email address."]);
